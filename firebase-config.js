@@ -14,7 +14,8 @@ const firebaseConfig = {
     storageBucket: "anon-message-app.firebasestorage.app",
     messagingSenderId: "670237650919",
     appId: "1:670237650919:web:2ba1ffaa607c0738a25742",
-    measurementId: "G-QW1589ZK38"
+    measurementId: "G-QW1589ZK38",
+    databaseURL: "https://anon-message-app.firebaseio.com"
 };
 
 // BEFORE DEPLOYING:
@@ -74,3 +75,4 @@ function handleUserLoggedOut() {
         window.location.href = 'index.html';
     }
 }
+
