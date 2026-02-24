@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Anonymous Message App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <h3>💬 Anon Messages</h3>
+        </div>
+        <ul class="navbar-menu">
+            <li><a href="#" onclick="showPage('inbox')">📥 Inbox</a></li>
+            <li><a href="#" onclick="showPage('profile')">👤 My Profile</a></li>
+            <li><a href="#" onclick="showPage('settings')">⚙️ Settings</a></li>
+            <li><a href="#" onclick="showPage('referral')">🔗 Referral</a></li>
+            <li><a href="#" onclick="showPage('about')">ℹ️ About Us</a></li>
+            <li id="admin-link" style="display:none;"><a href="#" onclick="showPage('admin')">🛠️ Admin</a></li>
+            <li><a href="#" onclick="logout()">🚪 Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <!-- Inbox Page -->
+        <div id="inbox-page" class="page active">
+            <h2>Your Inbox</h2>
+            <div id="offline-banner" style="display:none; padding:10px; background:#fff3f3; border:1px solid #ffd1d1; color:#b91c1c; border-radius:6px; margin-bottom:12px;">
+                You appear to be offline. Messages require an internet connection. <button class="btn btn-primary" onclick="retryLoadMessages()">Retry</button>
+            </div>
+            <div id="messages-list" class="messages-list">
+                <p>No messages yet</p>
+            </div>
+        </div>
+
+        <!-- Admin Page -->
+        <div id="admin-page" class="page">
+            <h2>Admin Panel</h2>
+            <div id="admin-users-list" class="referral-card">
+                <h3>Registered Users</h3>
+                <div id="users-container">Loading users...</div>
+            </div>
+            <div id="admin-user-view" style="margin-top:20px;"></div>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="profile-page" class="page">
+            <h2>My Profile</h2>
+            <div class="profile-card">
+                <p><strong>Username:</strong> <span id="profile-username"></span></p>
+                <p><strong>Email:</strong> <span id="profile-email"></span></p>
+                <p><strong>Account Created:</strong> <span id="profile-created"></span></p>
+                <p><strong>Referral Earnings:</strong> R<span id="profile-earnings">0</span></p>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings-page" class="page">
+            <h2>Settings</h2>
+            
+            <div class="settings-section">
+                <h3>Change Password</h3>
+                <form id="change-password-form">
+                    <input type="password" id="current-password" placeholder="Current Password" required>
+                    <input type="password" id="new-password" placeholder="New Password" required>
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </form>
+            </div>
+
+            <div class="settings-section">
+                <h3>Theme Color</h3>
+                <div class="theme-options">
+                    <input type="color" id="theme-color" value="#6366f1">
+                    <button type="button" class="btn btn-secondary" onclick="applyTheme()">Apply Theme</button>
+                </div>
+            </div>
+
+            <div class="settings-section danger-zone">
+                <h3>Danger Zone</h3>
+                <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+            </div>
+        </div>
+
+        <!-- Referral Page -->
+        <div id="referral-page" class="page">
+            <h2>Referral Program</h2>
+            <div class="referral-card">
+                <h3>Earn R10 + R10 per referral!</h3>
+                <p>Share your link and earn rewards. Get R50 FREE for every 15 people who sign up!</p>
+                
+                <div class="referral-section">
+                    <h4>Your Referral Link:</h4>
+                    <div class="referral-link-container">
+                        <input type="text" id="referral-link" readonly>
+                        <button class="btn btn-primary" onclick="copyReferralLink()">Copy</button>
+                    </div>
+                </div>
+
+                <div class="referral-section">
+                    <h4>Your Recipient Code:</h4>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input type="text" id="recipient-code-display" readonly style="flex:1; background:#f9fafb; padding:10px; border-radius:8px; border:1px solid var(--border-color);">
+                        <button class="btn btn-primary" onclick="copyRecipientCode()">Copy</button>
+                    </div>
+                    <p style="margin-top:8px; color:#666;">Share this code so others can send you anonymous messages without needing your email.</p>
+                </div>
+
+                <div class="referral-section">
+                    <h4>How to use (Quick Steps):</h4>
+                    <ol style="margin-left:16px; color:#444;">
+                        <li>Step 1: Share your <strong>Referral Link</strong> on social media using the Copy button.</li>
+                        <li>Step 2: Tell others to paste your <strong>Recipient Code</strong> into the <em>Recipient</em> field on the homepage (or they can use your username).</li>
+                        <li>Step 3: They write their message and click <strong>Send Anonymous Message</strong>. You will see it in your Inbox.</li>
+                    </ol>
+                </div>
+
+                <div class="referral-section">
+                    <h4>Referral Stats:</h4>
+                    <p>People Referred: <strong id="referral-count">0</strong></p>
+                    <p>Earnings: R<strong id="referral-earnings">0</strong></p>
+                    <p>Bonus Rewards (per 15): R<strong id="bonus-rewards">0</strong></p>
+                </div>
+
+                <div class="referral-section">
+                    <button class="btn btn-secondary" onclick="regenerateReferralLink()">Generate New Link</button>
+                    <button class="btn btn-danger" onclick="stopReferralProgram()">Stop Program</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Us Page -->
+        <div id="about-page" class="page">
+            <h2>About Us</h2>
+            <div class="about-content">
+                <h3>Anonymous Message App</h3>
+                <p>
+                    Share your thoughts, ideas, and messages anonymously. 
+                    No judgments, no filters, just honest communication.
+                </p>
+
+                <h3>Contact Us</h3>
+                <p>
+                    📧 Email: <a href="mailto:silindelwasimelane@gmail.com">silindelwasimelane@gmail.com</a>
+                </p>
+                <p>
+                    💬 WhatsApp Channel: <a href="https://whatsapp.com/channel/0029Vb7bGEQIHphDP72VD81b" target="_blank">Join Our Channel</a>
+                </p>
+
+                <h3>Features</h3>
+                <ul>
+                    <li>✅ Send anonymous messages</li>
+                    <li>✅ Create secure account</li>
+                    <li>✅ Earn rewards through referrals</li>
+                    <li>✅ Customize your theme</li>
+                    <li>✅ Manage your account safely</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <footer class="site-footer">@annonymous messagee || siyamThanda simeLane - 2026</footer>
+</body>
+</html>
