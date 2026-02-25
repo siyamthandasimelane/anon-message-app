@@ -1,355 +1,236 @@
-# MongoDB Node.js Driver
+# Anonymous Message App
 
-The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
+A secure, modern web application where users can send anonymous messages to each other and earn rewards through a referral program.
 
-**Upgrading to version 7? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md)!**
+## Features
 
-## Quick Links
+✅ **Anonymous Messaging** - Send messages without revealing your identity  
+✅ **User Accounts** - Secure authentication system  
+✅ **Referral Program** - Earn R10 per referral + R50 bonus for every 15 people  
+✅ **Rewards System** - Track earnings and referral stats  
+✅ **Customizable Theme** - Change primary color to your preference  
+✅ **Message Inbox** - Receive and manage messages  
+✅ **Account Management** - Change password, delete account, manage settings  
+✅ **Contact Info** - Built-in contact links and social channels  
+✅ **Responsive Design** - Works on all devices  
 
-| Site                     | Link                                                                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Documentation            | [www.mongodb.com/docs/drivers/node](https://www.mongodb.com/docs/drivers/node)                                                        |
-| API Docs                 | [mongodb.github.io/node-mongodb-native](https://mongodb.github.io/node-mongodb-native)                                                |
-| `npm` package            | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                                                |
-| MongoDB                  | [www.mongodb.com](https://www.mongodb.com)                                                                                            |
-| MongoDB University       | [learn.mongodb.com](https://learn.mongodb.com/catalog?labels=%5B%22Language%22%5D&values=%5B%22Node.js%22%5D)                         |
-| MongoDB Developer Center | [www.mongodb.com/developer](https://www.mongodb.com/developer/languages/javascript/)                                                  |
-| Stack Overflow           | [stackoverflow.com](https://stackoverflow.com/search?q=%28%5Btypescript%5D+or+%5Bjavascript%5D+or+%5Bnode.js%5D%29+and+%5Bmongodb%5D) |
-| Source Code              | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                                              |
-| Upgrade to v7            | [etc/notes/CHANGES_7.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md)                     |
-| Contributing             | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)                                           |
-| Changelog                | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                                                     |
+## Tech Stack
 
-### Release Integrity
+- **Frontend:** HTML5, CSS3, JavaScript ES6+
+- **Backend & Database:** Node/Express API with MongoDB Atlas (previously Firebase)
+- **Deployment:** GitHub Pages (frontend) + any Node host (Heroku, Railway, etc.)
 
-Releases are created automatically and signed using the [Node team's GPG key](https://pgp.mongodb.com/node-driver.asc). This applies to the git tag as well as all release packages provided as part of a GitHub release. To verify the provided packages, download the key and import it using gpg:
+## Setup Instructions
 
-```shell
-gpg --import node-driver.asc
-```
+(This project originally used Firebase for auth and data. The current version uses a self‑hosted Node/Express backend with MongoDB. If you have old Firebase instructions above, they can be ignored.)
 
-The GitHub release contains a detached signature file for the NPM package (named
-`mongodb-X.Y.Z.tgz.sig`).
+### 3. Set up a MongoDB database
 
-The following command returns the link npm package.
+1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) and sign in or create an account.
+2. Create a new **free cluster**.
+3. In **Database Access**, add a user and note the username/password.
+4. Under **Network Access** whitelist your local IP (or `0.0.0.0/0` for testing).
+5. Click **Connect**, choose "Connect your application", and copy the connection string.
+6. Create a new database called `anon-message-app` with two collections: `users` and `messages`.
 
-```shell
-npm view mongodb@vX.Y.Z dist.tarball
-```
+### 4. Run the API server
 
-Using the result of the above command, a `curl` command can return the official npm package for the release.
+1. Enter the `server` directory:
+   ```bash
+   cd server
+   ```
+2. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+3. Edit `.env` and set `MONGODB_URI` to the Atlas connection string, with user/password included.
+   Also set `JWT_SECRET` to a long random string.
+4. Install dependencies and start the server:
+   ```bash
+   npm install
+   npm run dev      # or npm start for production
+   ```
+5. The API will listen on port 3000 by default when run locally.
 
-To verify the integrity of the downloaded package, run the following command:
+6. **Deploying the backend** – recommended free option is Vercel (serverless):
+   ```bash
+   npm i -g vercel
+   vercel login
+   cd c:\tmp\anon-message-app
+   vercel                # follow the prompts
+   vercel env add MONGODB_URI production
+   vercel env add JWT_SECRET production
+   ```
+   The same repository will host your static frontend and the `/api` routes.
+   You can also deploy the backend independently on Heroku or Railway if you
+   prefer, but those are not strictly free long‑term.
 
-```shell
-gpg --verify mongodb-X.Y.Z.tgz.sig mongodb-X.Y.Z.tgz
-```
+7. Update your frontend deployment (GitHub Pages, Vercel, etc.). The client now talks to the API endpoints instead of Firebase.
 
-> [!Note]
-> No verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.
+You can remove `firebase-config.js` once you're confident the migration is complete.
 
-The MongoDB Node.js driver follows [semantic versioning](https://semver.org/) for its releases.
+### 5. Frontend updates
 
-### Bugs / Feature Requests
+The client now uses a simple API layer (`auth.js` and `app.js` handle the requests). The login/signup forms POST to `/api/auth/login` and `/api/auth/signup` respectively. Messages and user/profile data are fetched from `/api/messages` and `/api/users/:id`.
 
-Think you’ve found a bug? Want to see a new feature in `node-mongodb-native`? Please open a
-case in our issue management tool, JIRA:
+Since the backend handles authentication using JWTs, you no longer need any Firebase SDKs or config; those `<script>` tags were removed from the HTML files.
 
-- Create an account and login [jira.mongodb.org](https://jira.mongodb.org).
-- Navigate to the NODE project [jira.mongodb.org/browse/NODE](https://jira.mongodb.org/browse/NODE).
-- Click **Create Issue** - Please provide as much information as possible about the issue type and how to reproduce it.
+### 6. Deploy to GitHub Pages
 
-Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the
-Core Server (i.e. SERVER) project are **public**.
-
-### Support / Feedback
-
-For issues with, questions about, or feedback for the Node.js driver, please look into our [support channels](https://www.mongodb.com/docs/manual/support). Please do not email any of the driver developers directly with issues or questions - you're more likely to get an answer on the [MongoDB Community Forums](https://community.mongodb.com/tags/c/drivers-odms-connectors/7/node-js-driver).
-
-### Change Log
-
-Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md).
-
-### Compatibility
-
-The driver currently supports 4.2+ servers.
-
-For exhaustive server and runtime version compatibility matrices, please refer to the following links:
-
-- [MongoDB](https://www.mongodb.com/docs/drivers/node/current/compatibility/#mongodb-compatibility)
-- [NodeJS](https://www.mongodb.com/docs/drivers/node/current/compatibility/#language-compatibility)
-
-#### Component Support Matrix
-
-The following table describes add-on component version compatibility for the Node.js driver. Only packages with versions in these supported ranges are stable when used in combination.
-
-| Component                                                                            | `mongodb@3.x`      | `mongodb@4.x`      | `mongodb@5.x`      | `mongodb@<6.12` | `mongodb@>=6.12`   | `mongodb@7.x` |
-| ------------------------------------------------------------------------------------ | ------------------ | ------------------ | ------------------ | --------------- | ------------------ | ------------- |
-| [bson](https://www.npmjs.com/package/bson)                                           | ^1.0.0             | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             | ^7.0.0        |
-| [bson-ext](https://www.npmjs.com/package/bson-ext)                                   | ^1.0.0 \|\| ^2.0.0 | ^4.0.0             | N/A                | N/A             | N/A                | N/A           |
-| [kerberos](https://www.npmjs.com/package/kerberos)                                   | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^1.0.0 \|\| ^2.0.0 | ^2.0.1          | ^2.0.1             | ^7.0.0        |
-| [mongodb-client-encryption](https://www.npmjs.com/package/mongodb-client-encryption) | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^2.3.0             | ^6.0.0          | ^6.0.0             | ^7.0.0        |
-| [mongodb-legacy](https://www.npmjs.com/package/mongodb-legacy)                       | N/A                | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             | N/A           |
-| [@mongodb-js/zstd](https://www.npmjs.com/package/@mongodb-js/zstd)                   | N/A                | ^1.0.0             | ^1.0.0             | ^1.1.0          | ^1.1.0 \|\| ^2.0.0 | ^7.0.0        |
-
-#### Typescript Version
-
-We recommend using the latest version of typescript, however we currently ensure the driver's public types compile against `typescript@5.6.0`.
-This is the lowest typescript version guaranteed to work with our driver: older versions may or may not work - use at your own risk.
-Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes), we consider this support best effort.
-If you run into any unexpected compiler failures against our supported TypeScript versions, please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).
-
-Additionally, our Typescript types are compatible with the ECMAScript standard for our minimum supported Node version. Currently, our Typescript targets es2023.
-
-## Installation
-
-The recommended way to get started using the Node.js driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
-
-After you've created your own project using `npm init`, you can run:
-
+1. Create a new GitHub repository: `anon-message-app`
+2. Clone your repository locally
+3. Copy all files to your local repo
+4. Push to GitHub:
 ```bash
-npm install mongodb
+git add .
+git commit -m "Initial commit - Anonymous Message App"
+git push origin main
 ```
 
-This will download the MongoDB driver and add a dependency entry in your `package.json` file.
+5. Go to repository **Settings** → **Pages**
+6. Under "Source", select **main** branch
+7. Click **Save**
+8. Your app will be live at: `https://yourusername.github.io/anon-message-app/`
 
-If you are a Typescript user, you will need the Node.js type definitions to use the driver's definitions:
+## Database Structure
 
-```sh
-npm install -D @types/node
-```
+Using MongoDB the collections look similar:
 
-## Driver Extensions
-
-The MongoDB driver can optionally be enhanced by the following feature packages:
-
-Maintained by MongoDB:
-
-- Zstd network compression - [@mongodb-js/zstd](https://github.com/mongodb-js/zstd)
-- MongoDB field level and queryable encryption - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
-- GSSAPI / SSPI / Kerberos authentication - [kerberos](https://github.com/mongodb-js/kerberos)
-
-Some of these packages include native C++ extensions.
-Consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/native-extensions.md) if you run into compilation issues.
-
-Third party:
-
-- Snappy network compression - [snappy](https://github.com/Brooooooklyn/snappy)
-- AWS authentication - [@aws-sdk/credential-providers](https://github.com/aws/aws-sdk-js-v3/tree/main/packages/credential-providers)
-
-## Quick Start
-
-This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [official documentation](https://www.mongodb.com/docs/drivers/node/).
-
-### Create the `package.json` file
-
-First, create a directory where your application will live.
-
-```bash
-mkdir myProject
-cd myProject
-```
-
-Enter the following command and answer the questions to create the initial structure for your new project:
-
-```bash
-npm init -y
-```
-
-Next, install the driver as a dependency.
-
-```bash
-npm install mongodb
-```
-
-### Start a MongoDB Server
-
-For complete MongoDB installation instructions, see [the manual](https://www.mongodb.com/docs/manual/installation/).
-
-1. Download the right MongoDB version from [MongoDB](https://www.mongodb.org/downloads)
-2. Create a database directory (in this case under **/data**).
-3. Install and start a `mongod` process.
-
-```bash
-mongod --dbpath=/data
-```
-
-You should see the **mongod** process start up and print some status information.
-
-### Connect to MongoDB
-
-Create a new **app.js** file and add the following code to try out some basic CRUD
-operations using the MongoDB driver.
-
-Add code to connect to the server and the database **myProject**:
-
-> **NOTE:** Resolving DNS Connection issues
->
-> Node.js 18 changed the default DNS resolution ordering from always prioritizing IPv4 to the ordering
-> returned by the DNS provider. In some environments, this can result in `localhost` resolving to
-> an IPv6 address instead of IPv4 and a consequent failure to connect to the server.
->
-> This can be resolved by:
->
-> - specifying the IP address family using the MongoClient `family` option (`MongoClient(<uri>, { family: 4 } )`)
-> - launching mongod or mongos with the ipv6 flag enabled ([--ipv6 mongod option documentation](https://www.mongodb.com/docs/manual/reference/program/mongod/#std-option-mongod.--ipv6))
-> - using a host of `127.0.0.1` in place of localhost
-> - specifying the DNS resolution ordering with the `--dns-resolution-order` Node.js command line argument (e.g. `node --dns-resolution-order=ipv4first`)
-
-```js
-const { MongoClient } = require('mongodb');
-// or as an es module:
-// import { MongoClient } from 'mongodb'
-
-// Connection URL
-const url = 'mongodb://localhost:27017';
-const client = new MongoClient(url);
-
-// Database Name
-const dbName = 'myProject';
-
-async function main() {
-  // Use connect method to connect to the server
-  await client.connect();
-  console.log('Connected successfully to server');
-  const db = client.db(dbName);
-  const collection = db.collection('documents');
-
-  // the following code examples can be pasted here...
-
-  return 'done.';
+```json
+// users collection document
+{
+  "_id": ObjectId,
+  "username": "alice",
+  "email": "alice@example.com",
+  "password": "<bcrypt hash>",
+  "createdAt": ISODate,
+  "referralCode": "REF_...",
+  "referralEarnings": 10,
+  "referralCount": 0,
+  "totalBonusRewards": 0,
+  "referralActive": true,
+  "isAdmin": false,
+  "accountActive": true
 }
-
-main()
-  .then(console.log)
-  .catch(console.error)
-  .finally(() => client.close());
 ```
 
-Run your app from the command line with:
-
-```bash
-node app.js
+```json
+// messages collection document
+{
+  "_id": ObjectId,
+  "from": "Anonymous"|
+          "username of sender",
+  "to": "recipientUsername",
+  "text": "Hello there!",
+  "timestamp": ISODate,
+  "read": false
+}
 ```
 
-The application should print **Connected successfully to server** to the console.
+## How Referral System Works
 
-### Insert a Document
+1. **New User Signs Up:** Earns R10
+2. **Using Referral Link:** Signer gets R10, referrer gets R10
+3. **Bonus Rewards:** Every 15 people who sign up = R50 bonus
+4. **Example:**
+   - 1-14 people: R10 each = R140
+   - 15+ people: Add R50 bonus = R190 total
+   - 30+ people: Add another R50 = R240 total
 
-Add to **app.js** the following function which uses the **insertMany**
-method to add three documents to the **documents** collection.
+## Features Explained
 
-```js
-const insertResult = await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]);
-console.log('Inserted documents =>', insertResult);
+### 1. Landing Page
+- Three options: Send Anonymous Message, Create Account, Login
+- Anonymous messaging without account creation
+
+### 2. Dashboard Navigation
+- **Inbox:** View all received messages
+- **My Profile:** See username, email, creation date, earnings
+- **Settings:** Change password, theme color, delete account
+- **Referral:** View referral link, stats, earn rewards
+- **About Us:** Contact info and social links
+
+### 3. Referral Program
+- Generate unique referral link to share
+- Regenerate link if needed
+- Stop referral program anytime
+- Track referral count and earnings
+
+### 4. Theme Customization
+- Pick any color for the app theme
+- Changes apply immediately
+- Saved to your account
+
+### 5. Contact Information
+- 📧 Email: silindelwasimelane@gmail.com
+- 💬 WhatsApp: https://whatsapp.com/channel/0029Vb7bGEQIHphDP72VD81b
+
+## File Structure
+
+```
+anon-message-app/
+├── index.html              # Landing page (frontend)
+├── auth.html               # Login/Signup page (frontend)
+├── dashboard.html          # Main app dashboard (frontend)
+├── styles.css              # All styling
+├── auth.js                 # Authentication & API helper logic (frontend)
+├── app.js                  # Dashboard & app logic (frontend)
+├── server/                 # Node/Express API and MongoDB backend
+├── .gitignore              # Git ignore file
+└── README.md               # This file
 ```
 
-The **insertMany** command returns an object with information about the insert operations.
+## Browser Support
 
-### Find All Documents
+- Chrome/Edge (latest)
+- Firefox (latest)
+- Safari (latest)
+- Mobile browsers
 
-Add a query that returns all the documents.
+## Security Notes
 
-```js
-const findResult = await collection.find({}).toArray();
-console.log('Found documents =>', findResult);
-```
-
-This query returns all the documents in the **documents** collection.
-If you add this below the insertMany example, you'll see the documents you've inserted.
-
-### Find Documents with a Query Filter
-
-Add a query filter to find only documents which meet the query criteria.
-
-```js
-const filteredDocs = await collection.find({ a: 3 }).toArray();
-console.log('Found documents filtered by { a: 3 } =>', filteredDocs);
-```
-
-Only the documents which match `'a' : 3` should be returned.
-
-### Update a document
-
-The following operation updates a document in the **documents** collection.
-
-```js
-const updateResult = await collection.updateOne({ a: 3 }, { $set: { b: 1 } });
-console.log('Updated documents =>', updateResult);
-```
-
-The method updates the first document where the field **a** is equal to **3** by adding a new field **b** to the document set to **1**. `updateResult` contains information about whether there was a matching document to update or not.
-
-### Remove a document
-
-Remove the document where the field **a** is equal to **3**.
-
-```js
-const deleteResult = await collection.deleteMany({ a: 3 });
-console.log('Deleted documents =>', deleteResult);
-```
-
-### Index a Collection
-
-[Indexes](https://www.mongodb.com/docs/manual/indexes/) can improve your application's
-performance. The following function creates an index on the **a** field in the
-**documents** collection.
-
-```js
-const indexName = await collection.createIndex({ a: 1 });
-console.log('index name =', indexName);
-```
-
-For more detailed information, see the [indexing strategies page](https://www.mongodb.com/docs/manual/applications/indexes/).
-
-## Error Handling
-
-If you need to filter certain errors from our driver, we have a helpful tree of errors described in [etc/notes/errors.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/errors.md).
-
-It is our recommendation to use `instanceof` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code.
-We guarantee `instanceof` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
-
-Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
-This means `instanceof` will always be able to accurately capture the errors that our driver throws.
-
-```typescript
-const client = new MongoClient(url);
-await client.connect();
-const collection = client.db().collection('collection');
-
-try {
-  await collection.insertOne({ _id: 1 });
-  await collection.insertOne({ _id: 1 }); // duplicate key error
-} catch (error) {
-  if (error instanceof MongoServerError) {
-    console.log(`Error worth logging: ${error}`); // special case for some reason
+- ⚠️ FirebaseConfig is stored client-side (normal for Firebase apps)
+- ⚠️ Enable Firebase Security Rules in production:
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+    match /messages/{messageId} {
+      // By default this project allows creating anonymous messages.
+      // If you want users who are NOT signed in to be able to send anonymous
+      // messages, use the rule below. WARNING: this allows anyone (including
+      // unauthenticated clients) to create documents in the `messages` collection.
+      // Keep read permissions restricted as needed for privacy.
+      allow create: if true;
+      // Allow reads only for authenticated users (tweak as needed):
+      allow read: if request.auth != null;
+    }
   }
-  throw error; // still want to crash
 }
 ```
 
-## Nightly releases
+## Future Enhancements
 
-If you need to test with a change from the latest `main` branch, our `mongodb` npm package has nightly versions released under the `nightly` tag.
+- [ ] Email notifications for new messages
+- [ ] Message reactions/emojis
+- [ ] Message scheduling
+- [ ] User blocking/muting
+- [ ] Admin dashboard
+- [ ] Payment integration for withdrawing earnings
 
-```sh
-npm install mongodb@nightly
-```
+## Support
 
-Nightly versions are published regardless of testing outcome.
-This means there could be semantic breakages or partially implemented features.
-The nightly build is not suitable for production use.
-
-## Next Steps
-
-- [MongoDB Documentation](https://www.mongodb.com/docs/manual/)
-- [MongoDB Node Driver Documentation](https://www.mongodb.com/docs/drivers/node/)
-- [Read about Schemas](https://www.mongodb.com/docs/manual/core/data-modeling-introduction/)
-- [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
+For issues or questions:
+- 📧 Email: silindelwasimelane@gmail.com
+- 💬 WhatsApp: https://whatsapp.com/channel/0029Vb7bGEQIHphDP72VD81b
 
 ## License
 
-[Apache 2.0](LICENSE.md)
+Free to use and modify. Created with ❤️
 
-© 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTORS.md) \
-© 2009-2012 Christian Amor Kvalheim
+---
+
+**Made with HTML, CSS, JavaScript & MongoDB** 🚀
