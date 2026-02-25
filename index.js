@@ -1,193 +1,164 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MongoRuntimeError = exports.MongoParseError = exports.MongoOperationTimeoutError = exports.MongoOIDCError = exports.MongoNotConnectedError = exports.MongoNetworkTimeoutError = exports.MongoNetworkError = exports.MongoMissingDependencyError = exports.MongoMissingCredentialsError = exports.MongoKerberosError = exports.MongoInvalidArgumentError = exports.MongoGridFSStreamError = exports.MongoGridFSChunkError = exports.MongoGCPError = exports.MongoExpiredSessionError = exports.MongoError = exports.MongoDriverError = exports.MongoDecompressionError = exports.MongoCursorInUseError = exports.MongoCursorExhaustedError = exports.MongoCompatibilityError = exports.MongoClientClosedError = exports.MongoClientBulkWriteExecutionError = exports.MongoClientBulkWriteError = exports.MongoClientBulkWriteCursorError = exports.MongoChangeStreamError = exports.MongoBatchReExecutionError = exports.MongoAzureError = exports.MongoAWSError = exports.MongoAPIError = exports.ExplainableCursor = exports.ChangeStreamCursor = exports.ClientEncryption = exports.MongoBulkWriteError = exports.UUID = exports.Timestamp = exports.ObjectId = exports.MinKey = exports.MaxKey = exports.Long = exports.Int32 = exports.Double = exports.Decimal128 = exports.DBRef = exports.Code = exports.BSONType = exports.BSONSymbol = exports.BSONRegExp = exports.Binary = exports.BSON = void 0;
-exports.CommandStartedEvent = exports.CommandFailedEvent = exports.WriteConcern = exports.ReadPreference = exports.ReadConcern = exports.TopologyType = exports.ServerType = exports.ReadPreferenceMode = exports.ReadConcernLevel = exports.ProfilingLevel = exports.ReturnDocument = exports.SeverityLevel = exports.MongoLoggableComponent = exports.ServerApiVersion = exports.ExplainVerbosity = exports.MongoErrorLabel = exports.CursorTimeoutMode = exports.CURSOR_FLAGS = exports.Compressor = exports.AuthMechanism = exports.GSSAPICanonicalizationValue = exports.AutoEncryptionLoggerLevel = exports.BatchType = exports.UnorderedBulkOperation = exports.OrderedBulkOperation = exports.MongoClient = exports.ListIndexesCursor = exports.ListCollectionsCursor = exports.GridFSBucketWriteStream = exports.GridFSBucketReadStream = exports.GridFSBucket = exports.FindCursor = exports.Db = exports.Collection = exports.ClientSession = exports.ChangeStream = exports.CancellationToken = exports.AggregationCursor = exports.Admin = exports.AbstractCursor = exports.MongoWriteConcernError = exports.MongoUnexpectedServerResponseError = exports.MongoTransactionError = exports.MongoTopologyClosedError = exports.MongoTailableCursorError = exports.MongoSystemError = exports.MongoStalePrimaryError = exports.MongoServerSelectionError = exports.MongoServerError = exports.MongoServerClosedError = void 0;
-exports.MongoClientAuthProviders = exports.MongoCryptKMSRequestNetworkTimeoutError = exports.MongoCryptInvalidArgumentError = exports.MongoCryptError = exports.MongoCryptCreateEncryptedCollectionError = exports.MongoCryptCreateDataKeyError = exports.MongoCryptAzureKMSRequestError = exports.SrvPollingEvent = exports.WaitingForSuitableServerEvent = exports.ServerSelectionSucceededEvent = exports.ServerSelectionStartedEvent = exports.ServerSelectionFailedEvent = exports.ServerSelectionEvent = exports.TopologyOpeningEvent = exports.TopologyDescriptionChangedEvent = exports.TopologyClosedEvent = exports.ServerOpeningEvent = exports.ServerHeartbeatSucceededEvent = exports.ServerHeartbeatStartedEvent = exports.ServerHeartbeatFailedEvent = exports.ServerDescriptionChangedEvent = exports.ServerClosedEvent = exports.ConnectionReadyEvent = exports.ConnectionPoolReadyEvent = exports.ConnectionPoolMonitoringEvent = exports.ConnectionPoolCreatedEvent = exports.ConnectionPoolClosedEvent = exports.ConnectionPoolClearedEvent = exports.ConnectionCreatedEvent = exports.ConnectionClosedEvent = exports.ConnectionCheckOutStartedEvent = exports.ConnectionCheckOutFailedEvent = exports.ConnectionCheckedOutEvent = exports.ConnectionCheckedInEvent = exports.CommandSucceededEvent = void 0;
-const admin_1 = require("./admin");
-Object.defineProperty(exports, "Admin", { enumerable: true, get: function () { return admin_1.Admin; } });
-const ordered_1 = require("./bulk/ordered");
-Object.defineProperty(exports, "OrderedBulkOperation", { enumerable: true, get: function () { return ordered_1.OrderedBulkOperation; } });
-const unordered_1 = require("./bulk/unordered");
-Object.defineProperty(exports, "UnorderedBulkOperation", { enumerable: true, get: function () { return unordered_1.UnorderedBulkOperation; } });
-const change_stream_1 = require("./change_stream");
-Object.defineProperty(exports, "ChangeStream", { enumerable: true, get: function () { return change_stream_1.ChangeStream; } });
-const collection_1 = require("./collection");
-Object.defineProperty(exports, "Collection", { enumerable: true, get: function () { return collection_1.Collection; } });
-const abstract_cursor_1 = require("./cursor/abstract_cursor");
-Object.defineProperty(exports, "AbstractCursor", { enumerable: true, get: function () { return abstract_cursor_1.AbstractCursor; } });
-const aggregation_cursor_1 = require("./cursor/aggregation_cursor");
-Object.defineProperty(exports, "AggregationCursor", { enumerable: true, get: function () { return aggregation_cursor_1.AggregationCursor; } });
-const find_cursor_1 = require("./cursor/find_cursor");
-Object.defineProperty(exports, "FindCursor", { enumerable: true, get: function () { return find_cursor_1.FindCursor; } });
-const list_collections_cursor_1 = require("./cursor/list_collections_cursor");
-Object.defineProperty(exports, "ListCollectionsCursor", { enumerable: true, get: function () { return list_collections_cursor_1.ListCollectionsCursor; } });
-const list_indexes_cursor_1 = require("./cursor/list_indexes_cursor");
-Object.defineProperty(exports, "ListIndexesCursor", { enumerable: true, get: function () { return list_indexes_cursor_1.ListIndexesCursor; } });
-const db_1 = require("./db");
-Object.defineProperty(exports, "Db", { enumerable: true, get: function () { return db_1.Db; } });
-const gridfs_1 = require("./gridfs");
-Object.defineProperty(exports, "GridFSBucket", { enumerable: true, get: function () { return gridfs_1.GridFSBucket; } });
-const download_1 = require("./gridfs/download");
-Object.defineProperty(exports, "GridFSBucketReadStream", { enumerable: true, get: function () { return download_1.GridFSBucketReadStream; } });
-const upload_1 = require("./gridfs/upload");
-Object.defineProperty(exports, "GridFSBucketWriteStream", { enumerable: true, get: function () { return upload_1.GridFSBucketWriteStream; } });
-const mongo_client_1 = require("./mongo_client");
-Object.defineProperty(exports, "MongoClient", { enumerable: true, get: function () { return mongo_client_1.MongoClient; } });
-const mongo_types_1 = require("./mongo_types");
-Object.defineProperty(exports, "CancellationToken", { enumerable: true, get: function () { return mongo_types_1.CancellationToken; } });
-const sessions_1 = require("./sessions");
-Object.defineProperty(exports, "ClientSession", { enumerable: true, get: function () { return sessions_1.ClientSession; } });
-/** @public */
-var bson_1 = require("./bson");
-Object.defineProperty(exports, "BSON", { enumerable: true, get: function () { return bson_1.BSON; } });
-var bson_2 = require("./bson");
-Object.defineProperty(exports, "Binary", { enumerable: true, get: function () { return bson_2.Binary; } });
-Object.defineProperty(exports, "BSONRegExp", { enumerable: true, get: function () { return bson_2.BSONRegExp; } });
-Object.defineProperty(exports, "BSONSymbol", { enumerable: true, get: function () { return bson_2.BSONSymbol; } });
-Object.defineProperty(exports, "BSONType", { enumerable: true, get: function () { return bson_2.BSONType; } });
-Object.defineProperty(exports, "Code", { enumerable: true, get: function () { return bson_2.Code; } });
-Object.defineProperty(exports, "DBRef", { enumerable: true, get: function () { return bson_2.DBRef; } });
-Object.defineProperty(exports, "Decimal128", { enumerable: true, get: function () { return bson_2.Decimal128; } });
-Object.defineProperty(exports, "Double", { enumerable: true, get: function () { return bson_2.Double; } });
-Object.defineProperty(exports, "Int32", { enumerable: true, get: function () { return bson_2.Int32; } });
-Object.defineProperty(exports, "Long", { enumerable: true, get: function () { return bson_2.Long; } });
-Object.defineProperty(exports, "MaxKey", { enumerable: true, get: function () { return bson_2.MaxKey; } });
-Object.defineProperty(exports, "MinKey", { enumerable: true, get: function () { return bson_2.MinKey; } });
-Object.defineProperty(exports, "ObjectId", { enumerable: true, get: function () { return bson_2.ObjectId; } });
-Object.defineProperty(exports, "Timestamp", { enumerable: true, get: function () { return bson_2.Timestamp; } });
-Object.defineProperty(exports, "UUID", { enumerable: true, get: function () { return bson_2.UUID; } });
-var common_1 = require("./bulk/common");
-Object.defineProperty(exports, "MongoBulkWriteError", { enumerable: true, get: function () { return common_1.MongoBulkWriteError; } });
-var client_encryption_1 = require("./client-side-encryption/client_encryption");
-Object.defineProperty(exports, "ClientEncryption", { enumerable: true, get: function () { return client_encryption_1.ClientEncryption; } });
-var change_stream_cursor_1 = require("./cursor/change_stream_cursor");
-Object.defineProperty(exports, "ChangeStreamCursor", { enumerable: true, get: function () { return change_stream_cursor_1.ChangeStreamCursor; } });
-var explainable_cursor_1 = require("./cursor/explainable_cursor");
-Object.defineProperty(exports, "ExplainableCursor", { enumerable: true, get: function () { return explainable_cursor_1.ExplainableCursor; } });
-var error_1 = require("./error");
-Object.defineProperty(exports, "MongoAPIError", { enumerable: true, get: function () { return error_1.MongoAPIError; } });
-Object.defineProperty(exports, "MongoAWSError", { enumerable: true, get: function () { return error_1.MongoAWSError; } });
-Object.defineProperty(exports, "MongoAzureError", { enumerable: true, get: function () { return error_1.MongoAzureError; } });
-Object.defineProperty(exports, "MongoBatchReExecutionError", { enumerable: true, get: function () { return error_1.MongoBatchReExecutionError; } });
-Object.defineProperty(exports, "MongoChangeStreamError", { enumerable: true, get: function () { return error_1.MongoChangeStreamError; } });
-Object.defineProperty(exports, "MongoClientBulkWriteCursorError", { enumerable: true, get: function () { return error_1.MongoClientBulkWriteCursorError; } });
-Object.defineProperty(exports, "MongoClientBulkWriteError", { enumerable: true, get: function () { return error_1.MongoClientBulkWriteError; } });
-Object.defineProperty(exports, "MongoClientBulkWriteExecutionError", { enumerable: true, get: function () { return error_1.MongoClientBulkWriteExecutionError; } });
-Object.defineProperty(exports, "MongoClientClosedError", { enumerable: true, get: function () { return error_1.MongoClientClosedError; } });
-Object.defineProperty(exports, "MongoCompatibilityError", { enumerable: true, get: function () { return error_1.MongoCompatibilityError; } });
-Object.defineProperty(exports, "MongoCursorExhaustedError", { enumerable: true, get: function () { return error_1.MongoCursorExhaustedError; } });
-Object.defineProperty(exports, "MongoCursorInUseError", { enumerable: true, get: function () { return error_1.MongoCursorInUseError; } });
-Object.defineProperty(exports, "MongoDecompressionError", { enumerable: true, get: function () { return error_1.MongoDecompressionError; } });
-Object.defineProperty(exports, "MongoDriverError", { enumerable: true, get: function () { return error_1.MongoDriverError; } });
-Object.defineProperty(exports, "MongoError", { enumerable: true, get: function () { return error_1.MongoError; } });
-Object.defineProperty(exports, "MongoExpiredSessionError", { enumerable: true, get: function () { return error_1.MongoExpiredSessionError; } });
-Object.defineProperty(exports, "MongoGCPError", { enumerable: true, get: function () { return error_1.MongoGCPError; } });
-Object.defineProperty(exports, "MongoGridFSChunkError", { enumerable: true, get: function () { return error_1.MongoGridFSChunkError; } });
-Object.defineProperty(exports, "MongoGridFSStreamError", { enumerable: true, get: function () { return error_1.MongoGridFSStreamError; } });
-Object.defineProperty(exports, "MongoInvalidArgumentError", { enumerable: true, get: function () { return error_1.MongoInvalidArgumentError; } });
-Object.defineProperty(exports, "MongoKerberosError", { enumerable: true, get: function () { return error_1.MongoKerberosError; } });
-Object.defineProperty(exports, "MongoMissingCredentialsError", { enumerable: true, get: function () { return error_1.MongoMissingCredentialsError; } });
-Object.defineProperty(exports, "MongoMissingDependencyError", { enumerable: true, get: function () { return error_1.MongoMissingDependencyError; } });
-Object.defineProperty(exports, "MongoNetworkError", { enumerable: true, get: function () { return error_1.MongoNetworkError; } });
-Object.defineProperty(exports, "MongoNetworkTimeoutError", { enumerable: true, get: function () { return error_1.MongoNetworkTimeoutError; } });
-Object.defineProperty(exports, "MongoNotConnectedError", { enumerable: true, get: function () { return error_1.MongoNotConnectedError; } });
-Object.defineProperty(exports, "MongoOIDCError", { enumerable: true, get: function () { return error_1.MongoOIDCError; } });
-Object.defineProperty(exports, "MongoOperationTimeoutError", { enumerable: true, get: function () { return error_1.MongoOperationTimeoutError; } });
-Object.defineProperty(exports, "MongoParseError", { enumerable: true, get: function () { return error_1.MongoParseError; } });
-Object.defineProperty(exports, "MongoRuntimeError", { enumerable: true, get: function () { return error_1.MongoRuntimeError; } });
-Object.defineProperty(exports, "MongoServerClosedError", { enumerable: true, get: function () { return error_1.MongoServerClosedError; } });
-Object.defineProperty(exports, "MongoServerError", { enumerable: true, get: function () { return error_1.MongoServerError; } });
-Object.defineProperty(exports, "MongoServerSelectionError", { enumerable: true, get: function () { return error_1.MongoServerSelectionError; } });
-Object.defineProperty(exports, "MongoStalePrimaryError", { enumerable: true, get: function () { return error_1.MongoStalePrimaryError; } });
-Object.defineProperty(exports, "MongoSystemError", { enumerable: true, get: function () { return error_1.MongoSystemError; } });
-Object.defineProperty(exports, "MongoTailableCursorError", { enumerable: true, get: function () { return error_1.MongoTailableCursorError; } });
-Object.defineProperty(exports, "MongoTopologyClosedError", { enumerable: true, get: function () { return error_1.MongoTopologyClosedError; } });
-Object.defineProperty(exports, "MongoTransactionError", { enumerable: true, get: function () { return error_1.MongoTransactionError; } });
-Object.defineProperty(exports, "MongoUnexpectedServerResponseError", { enumerable: true, get: function () { return error_1.MongoUnexpectedServerResponseError; } });
-Object.defineProperty(exports, "MongoWriteConcernError", { enumerable: true, get: function () { return error_1.MongoWriteConcernError; } });
-// enums
-var common_2 = require("./bulk/common");
-Object.defineProperty(exports, "BatchType", { enumerable: true, get: function () { return common_2.BatchType; } });
-var auto_encrypter_1 = require("./client-side-encryption/auto_encrypter");
-Object.defineProperty(exports, "AutoEncryptionLoggerLevel", { enumerable: true, get: function () { return auto_encrypter_1.AutoEncryptionLoggerLevel; } });
-var gssapi_1 = require("./cmap/auth/gssapi");
-Object.defineProperty(exports, "GSSAPICanonicalizationValue", { enumerable: true, get: function () { return gssapi_1.GSSAPICanonicalizationValue; } });
-var providers_1 = require("./cmap/auth/providers");
-Object.defineProperty(exports, "AuthMechanism", { enumerable: true, get: function () { return providers_1.AuthMechanism; } });
-var compression_1 = require("./cmap/wire_protocol/compression");
-Object.defineProperty(exports, "Compressor", { enumerable: true, get: function () { return compression_1.Compressor; } });
-var abstract_cursor_2 = require("./cursor/abstract_cursor");
-Object.defineProperty(exports, "CURSOR_FLAGS", { enumerable: true, get: function () { return abstract_cursor_2.CURSOR_FLAGS; } });
-Object.defineProperty(exports, "CursorTimeoutMode", { enumerable: true, get: function () { return abstract_cursor_2.CursorTimeoutMode; } });
-var error_2 = require("./error");
-Object.defineProperty(exports, "MongoErrorLabel", { enumerable: true, get: function () { return error_2.MongoErrorLabel; } });
-var explain_1 = require("./explain");
-Object.defineProperty(exports, "ExplainVerbosity", { enumerable: true, get: function () { return explain_1.ExplainVerbosity; } });
-var mongo_client_2 = require("./mongo_client");
-Object.defineProperty(exports, "ServerApiVersion", { enumerable: true, get: function () { return mongo_client_2.ServerApiVersion; } });
-var mongo_logger_1 = require("./mongo_logger");
-Object.defineProperty(exports, "MongoLoggableComponent", { enumerable: true, get: function () { return mongo_logger_1.MongoLoggableComponent; } });
-Object.defineProperty(exports, "SeverityLevel", { enumerable: true, get: function () { return mongo_logger_1.SeverityLevel; } });
-var find_and_modify_1 = require("./operations/find_and_modify");
-Object.defineProperty(exports, "ReturnDocument", { enumerable: true, get: function () { return find_and_modify_1.ReturnDocument; } });
-var set_profiling_level_1 = require("./operations/set_profiling_level");
-Object.defineProperty(exports, "ProfilingLevel", { enumerable: true, get: function () { return set_profiling_level_1.ProfilingLevel; } });
-var read_concern_1 = require("./read_concern");
-Object.defineProperty(exports, "ReadConcernLevel", { enumerable: true, get: function () { return read_concern_1.ReadConcernLevel; } });
-var read_preference_1 = require("./read_preference");
-Object.defineProperty(exports, "ReadPreferenceMode", { enumerable: true, get: function () { return read_preference_1.ReadPreferenceMode; } });
-var common_3 = require("./sdam/common");
-Object.defineProperty(exports, "ServerType", { enumerable: true, get: function () { return common_3.ServerType; } });
-Object.defineProperty(exports, "TopologyType", { enumerable: true, get: function () { return common_3.TopologyType; } });
-var read_concern_2 = require("./read_concern");
-Object.defineProperty(exports, "ReadConcern", { enumerable: true, get: function () { return read_concern_2.ReadConcern; } });
-var read_preference_2 = require("./read_preference");
-Object.defineProperty(exports, "ReadPreference", { enumerable: true, get: function () { return read_preference_2.ReadPreference; } });
-var write_concern_1 = require("./write_concern");
-Object.defineProperty(exports, "WriteConcern", { enumerable: true, get: function () { return write_concern_1.WriteConcern; } });
-// events
-var command_monitoring_events_1 = require("./cmap/command_monitoring_events");
-Object.defineProperty(exports, "CommandFailedEvent", { enumerable: true, get: function () { return command_monitoring_events_1.CommandFailedEvent; } });
-Object.defineProperty(exports, "CommandStartedEvent", { enumerable: true, get: function () { return command_monitoring_events_1.CommandStartedEvent; } });
-Object.defineProperty(exports, "CommandSucceededEvent", { enumerable: true, get: function () { return command_monitoring_events_1.CommandSucceededEvent; } });
-var connection_pool_events_1 = require("./cmap/connection_pool_events");
-Object.defineProperty(exports, "ConnectionCheckedInEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionCheckedInEvent; } });
-Object.defineProperty(exports, "ConnectionCheckedOutEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionCheckedOutEvent; } });
-Object.defineProperty(exports, "ConnectionCheckOutFailedEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionCheckOutFailedEvent; } });
-Object.defineProperty(exports, "ConnectionCheckOutStartedEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionCheckOutStartedEvent; } });
-Object.defineProperty(exports, "ConnectionClosedEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionClosedEvent; } });
-Object.defineProperty(exports, "ConnectionCreatedEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionCreatedEvent; } });
-Object.defineProperty(exports, "ConnectionPoolClearedEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionPoolClearedEvent; } });
-Object.defineProperty(exports, "ConnectionPoolClosedEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionPoolClosedEvent; } });
-Object.defineProperty(exports, "ConnectionPoolCreatedEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionPoolCreatedEvent; } });
-Object.defineProperty(exports, "ConnectionPoolMonitoringEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionPoolMonitoringEvent; } });
-Object.defineProperty(exports, "ConnectionPoolReadyEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionPoolReadyEvent; } });
-Object.defineProperty(exports, "ConnectionReadyEvent", { enumerable: true, get: function () { return connection_pool_events_1.ConnectionReadyEvent; } });
-var events_1 = require("./sdam/events");
-Object.defineProperty(exports, "ServerClosedEvent", { enumerable: true, get: function () { return events_1.ServerClosedEvent; } });
-Object.defineProperty(exports, "ServerDescriptionChangedEvent", { enumerable: true, get: function () { return events_1.ServerDescriptionChangedEvent; } });
-Object.defineProperty(exports, "ServerHeartbeatFailedEvent", { enumerable: true, get: function () { return events_1.ServerHeartbeatFailedEvent; } });
-Object.defineProperty(exports, "ServerHeartbeatStartedEvent", { enumerable: true, get: function () { return events_1.ServerHeartbeatStartedEvent; } });
-Object.defineProperty(exports, "ServerHeartbeatSucceededEvent", { enumerable: true, get: function () { return events_1.ServerHeartbeatSucceededEvent; } });
-Object.defineProperty(exports, "ServerOpeningEvent", { enumerable: true, get: function () { return events_1.ServerOpeningEvent; } });
-Object.defineProperty(exports, "TopologyClosedEvent", { enumerable: true, get: function () { return events_1.TopologyClosedEvent; } });
-Object.defineProperty(exports, "TopologyDescriptionChangedEvent", { enumerable: true, get: function () { return events_1.TopologyDescriptionChangedEvent; } });
-Object.defineProperty(exports, "TopologyOpeningEvent", { enumerable: true, get: function () { return events_1.TopologyOpeningEvent; } });
-var server_selection_events_1 = require("./sdam/server_selection_events");
-Object.defineProperty(exports, "ServerSelectionEvent", { enumerable: true, get: function () { return server_selection_events_1.ServerSelectionEvent; } });
-Object.defineProperty(exports, "ServerSelectionFailedEvent", { enumerable: true, get: function () { return server_selection_events_1.ServerSelectionFailedEvent; } });
-Object.defineProperty(exports, "ServerSelectionStartedEvent", { enumerable: true, get: function () { return server_selection_events_1.ServerSelectionStartedEvent; } });
-Object.defineProperty(exports, "ServerSelectionSucceededEvent", { enumerable: true, get: function () { return server_selection_events_1.ServerSelectionSucceededEvent; } });
-Object.defineProperty(exports, "WaitingForSuitableServerEvent", { enumerable: true, get: function () { return server_selection_events_1.WaitingForSuitableServerEvent; } });
-var srv_polling_1 = require("./sdam/srv_polling");
-Object.defineProperty(exports, "SrvPollingEvent", { enumerable: true, get: function () { return srv_polling_1.SrvPollingEvent; } });
-var errors_1 = require("./client-side-encryption/errors");
-Object.defineProperty(exports, "MongoCryptAzureKMSRequestError", { enumerable: true, get: function () { return errors_1.MongoCryptAzureKMSRequestError; } });
-Object.defineProperty(exports, "MongoCryptCreateDataKeyError", { enumerable: true, get: function () { return errors_1.MongoCryptCreateDataKeyError; } });
-Object.defineProperty(exports, "MongoCryptCreateEncryptedCollectionError", { enumerable: true, get: function () { return errors_1.MongoCryptCreateEncryptedCollectionError; } });
-Object.defineProperty(exports, "MongoCryptError", { enumerable: true, get: function () { return errors_1.MongoCryptError; } });
-Object.defineProperty(exports, "MongoCryptInvalidArgumentError", { enumerable: true, get: function () { return errors_1.MongoCryptInvalidArgumentError; } });
-Object.defineProperty(exports, "MongoCryptKMSRequestNetworkTimeoutError", { enumerable: true, get: function () { return errors_1.MongoCryptKMSRequestNetworkTimeoutError; } });
-var mongo_client_auth_providers_1 = require("./mongo_client_auth_providers");
-Object.defineProperty(exports, "MongoClientAuthProviders", { enumerable: true, get: function () { return mongo_client_auth_providers_1.MongoClientAuthProviders; } });
+exports.GridFSBucket = void 0;
+const error_1 = require("../error");
+const mongo_types_1 = require("../mongo_types");
+const timeout_1 = require("../timeout");
+const utils_1 = require("../utils");
+const write_concern_1 = require("../write_concern");
+const download_1 = require("./download");
+const upload_1 = require("./upload");
+const DEFAULT_GRIDFS_BUCKET_OPTIONS = {
+    bucketName: 'fs',
+    chunkSizeBytes: 255 * 1024
+};
+/**
+ * Constructor for a streaming GridFS interface
+ * @public
+ */
+class GridFSBucket extends mongo_types_1.TypedEventEmitter {
+    /**
+     * When the first call to openUploadStream is made, the upload stream will
+     * check to see if it needs to create the proper indexes on the chunks and
+     * files collections. This event is fired either when 1) it determines that
+     * no index creation is necessary, 2) when it successfully creates the
+     * necessary indexes.
+     * @event
+     */
+    static { this.INDEX = 'index'; }
+    constructor(db, options) {
+        super();
+        this.on('error', utils_1.noop);
+        this.setMaxListeners(0);
+        const privateOptions = (0, utils_1.resolveOptions)(db, {
+            ...DEFAULT_GRIDFS_BUCKET_OPTIONS,
+            ...options,
+            writeConcern: write_concern_1.WriteConcern.fromOptions(options)
+        });
+        this.s = {
+            db,
+            options: privateOptions,
+            _chunksCollection: db.collection(privateOptions.bucketName + '.chunks'),
+            _filesCollection: db.collection(privateOptions.bucketName + '.files'),
+            checkedIndexes: false,
+            calledOpenUploadStream: false
+        };
+    }
+    /**
+     * Returns a writable stream (GridFSBucketWriteStream) for writing
+     * buffers to GridFS. The stream's 'id' property contains the resulting
+     * file's id.
+     *
+     * @param filename - The value of the 'filename' key in the files doc
+     * @param options - Optional settings.
+     */
+    openUploadStream(filename, options) {
+        return new upload_1.GridFSBucketWriteStream(this, filename, {
+            timeoutMS: this.s.options.timeoutMS,
+            ...options
+        });
+    }
+    /**
+     * Returns a writable stream (GridFSBucketWriteStream) for writing
+     * buffers to GridFS for a custom file id. The stream's 'id' property contains the resulting
+     * file's id.
+     */
+    openUploadStreamWithId(id, filename, options) {
+        return new upload_1.GridFSBucketWriteStream(this, filename, {
+            timeoutMS: this.s.options.timeoutMS,
+            ...options,
+            id
+        });
+    }
+    /** Returns a readable stream (GridFSBucketReadStream) for streaming file data from GridFS. */
+    openDownloadStream(id, options) {
+        return new download_1.GridFSBucketReadStream(this.s._chunksCollection, this.s._filesCollection, this.s.options.readPreference, { _id: id }, { timeoutMS: this.s.options.timeoutMS, ...options });
+    }
+    /**
+     * Deletes a file with the given id
+     *
+     * @param id - The id of the file doc
+     */
+    async delete(id, options) {
+        const { timeoutMS } = (0, utils_1.resolveOptions)(this.s.db, options);
+        let timeoutContext = undefined;
+        if (timeoutMS) {
+            timeoutContext = new timeout_1.CSOTTimeoutContext({
+                timeoutMS,
+                serverSelectionTimeoutMS: this.s.db.client.s.options.serverSelectionTimeoutMS
+            });
+        }
+        const { deletedCount } = await this.s._filesCollection.deleteOne({ _id: id }, { timeoutMS: timeoutContext?.remainingTimeMS });
+        const remainingTimeMS = timeoutContext?.remainingTimeMS;
+        if (remainingTimeMS != null && remainingTimeMS <= 0)
+            throw new error_1.MongoOperationTimeoutError(`Timed out after ${timeoutMS}ms`);
+        // Delete orphaned chunks before returning FileNotFound
+        await this.s._chunksCollection.deleteMany({ files_id: id }, { timeoutMS: remainingTimeMS });
+        if (deletedCount === 0) {
+            // TODO(NODE-3483): Replace with more appropriate error
+            // Consider creating new error MongoGridFSFileNotFoundError
+            throw new error_1.MongoRuntimeError(`File not found for id ${id}`);
+        }
+    }
+    /** Convenience wrapper around find on the files collection */
+    find(filter = {}, options = {}) {
+        return this.s._filesCollection.find(filter, options);
+    }
+    /**
+     * Returns a readable stream (GridFSBucketReadStream) for streaming the
+     * file with the given name from GridFS. If there are multiple files with
+     * the same name, this will stream the most recent file with the given name
+     * (as determined by the `uploadDate` field). You can set the `revision`
+     * option to change this behavior.
+     */
+    openDownloadStreamByName(filename, options) {
+        let sort = { uploadDate: -1 };
+        let skip = undefined;
+        if (options && options.revision != null) {
+            if (options.revision >= 0) {
+                sort = { uploadDate: 1 };
+                skip = options.revision;
+            }
+            else {
+                skip = -options.revision - 1;
+            }
+        }
+        return new download_1.GridFSBucketReadStream(this.s._chunksCollection, this.s._filesCollection, this.s.options.readPreference, { filename }, { timeoutMS: this.s.options.timeoutMS, ...options, sort, skip });
+    }
+    /**
+     * Renames the file with the given _id to the given string
+     *
+     * @param id - the id of the file to rename
+     * @param filename - new name for the file
+     */
+    async rename(id, filename, options) {
+        const filter = { _id: id };
+        const update = { $set: { filename } };
+        const { matchedCount } = await this.s._filesCollection.updateOne(filter, update, options);
+        if (matchedCount === 0) {
+            throw new error_1.MongoRuntimeError(`File with id ${id} not found`);
+        }
+    }
+    /** Removes this bucket's files collection, followed by its chunks collection. */
+    async drop(options) {
+        const { timeoutMS } = (0, utils_1.resolveOptions)(this.s.db, options);
+        let timeoutContext = undefined;
+        if (timeoutMS) {
+            timeoutContext = new timeout_1.CSOTTimeoutContext({
+                timeoutMS,
+                serverSelectionTimeoutMS: this.s.db.client.s.options.serverSelectionTimeoutMS
+            });
+        }
+        if (timeoutContext) {
+            await this.s._filesCollection.drop({ timeoutMS: timeoutContext.remainingTimeMS });
+            const remainingTimeMS = timeoutContext.getRemainingTimeMSOrThrow(`Timed out after ${timeoutMS}ms`);
+            await this.s._chunksCollection.drop({ timeoutMS: remainingTimeMS });
+        }
+        else {
+            await this.s._filesCollection.drop();
+            await this.s._chunksCollection.drop();
+        }
+    }
+}
+exports.GridFSBucket = GridFSBucket;
 //# sourceMappingURL=index.js.map
