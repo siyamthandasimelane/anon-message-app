@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WaitQueueTimeoutError = exports.PoolClearedOnNetworkError = exports.PoolClearedError = exports.PoolClosedError = void 0;
+exports.MongoCryptKMSRequestNetworkTimeoutError = exports.MongoCryptAzureKMSRequestError = exports.MongoCryptCreateEncryptedCollectionError = exports.MongoCryptCreateDataKeyError = exports.MongoCryptInvalidArgumentError = exports.defaultErrorWrapper = exports.MongoCryptError = void 0;
 const error_1 = require("../error");
 /**
- * An error indicating a connection pool is closed
- * @category Error
+ * @public
+ * An error indicating that something went wrong specifically with MongoDB Client Encryption
  */
-class PoolClosedError extends error_1.MongoDriverError {
+class MongoCryptError extends error_1.MongoError {
     /**
      * **Do not use this constructor!**
      *
@@ -18,20 +18,22 @@ class PoolClosedError extends error_1.MongoDriverError {
      *
      * @public
      **/
-    constructor(pool) {
-        super('Attempted to check out a connection from closed connection pool');
-        this.address = pool.address;
+    constructor(message, options = {}) {
+        super(message, options);
     }
     get name() {
-        return 'MongoPoolClosedError';
+        return 'MongoCryptError';
     }
 }
-exports.PoolClosedError = PoolClosedError;
+exports.MongoCryptError = MongoCryptError;
+const defaultErrorWrapper = (error) => new MongoCryptError(error.message, { cause: error });
+exports.defaultErrorWrapper = defaultErrorWrapper;
 /**
- * An error indicating a connection pool is currently paused
- * @category Error
+ * @public
+ *
+ * An error indicating an invalid argument was provided to an encryption API.
  */
-class PoolClearedError extends error_1.MongoNetworkError {
+class MongoCryptInvalidArgumentError extends MongoCryptError {
     /**
      * **Do not use this constructor!**
      *
@@ -43,66 +45,94 @@ class PoolClearedError extends error_1.MongoNetworkError {
      *
      * @public
      **/
-    constructor(pool, message) {
-        const errorMessage = message
-            ? message
-            : `Connection pool for ${pool.address} was cleared because another operation failed with: "${pool.serverError?.message}"`;
-        super(errorMessage, pool.serverError ? { cause: pool.serverError } : undefined);
-        this.address = pool.address;
-        this.addErrorLabel(error_1.MongoErrorLabel.PoolRequestedRetry);
-    }
-    get name() {
-        return 'MongoPoolClearedError';
-    }
-}
-exports.PoolClearedError = PoolClearedError;
-/**
- * An error indicating that a connection pool has been cleared after the monitor for that server timed out.
- * @category Error
- */
-class PoolClearedOnNetworkError extends PoolClearedError {
-    /**
-     * **Do not use this constructor!**
-     *
-     * Meant for internal use only.
-     *
-     * @remarks
-     * This class is only meant to be constructed within the driver. This constructor is
-     * not subject to semantic versioning compatibility guarantees and may change at any time.
-     *
-     * @public
-     **/
-    constructor(pool) {
-        super(pool, `Connection to ${pool.address} interrupted due to server monitor timeout`);
-    }
-    get name() {
-        return 'PoolClearedOnNetworkError';
-    }
-}
-exports.PoolClearedOnNetworkError = PoolClearedOnNetworkError;
-/**
- * An error thrown when a request to check out a connection times out
- * @category Error
- */
-class WaitQueueTimeoutError extends error_1.MongoDriverError {
-    /**
-     * **Do not use this constructor!**
-     *
-     * Meant for internal use only.
-     *
-     * @remarks
-     * This class is only meant to be constructed within the driver. This constructor is
-     * not subject to semantic versioning compatibility guarantees and may change at any time.
-     *
-     * @public
-     **/
-    constructor(message, address) {
+    constructor(message) {
         super(message);
-        this.address = address;
     }
     get name() {
-        return 'MongoWaitQueueTimeoutError';
+        return 'MongoCryptInvalidArgumentError';
     }
 }
-exports.WaitQueueTimeoutError = WaitQueueTimeoutError;
+exports.MongoCryptInvalidArgumentError = MongoCryptInvalidArgumentError;
+/**
+ * @public
+ * An error indicating that `ClientEncryption.createEncryptedCollection()` failed to create data keys
+ */
+class MongoCryptCreateDataKeyError extends MongoCryptError {
+    /**
+     * **Do not use this constructor!**
+     *
+     * Meant for internal use only.
+     *
+     * @remarks
+     * This class is only meant to be constructed within the driver. This constructor is
+     * not subject to semantic versioning compatibility guarantees and may change at any time.
+     *
+     * @public
+     **/
+    constructor(encryptedFields, { cause }) {
+        super(`Unable to complete creating data keys: ${cause.message}`, { cause });
+        this.encryptedFields = encryptedFields;
+    }
+    get name() {
+        return 'MongoCryptCreateDataKeyError';
+    }
+}
+exports.MongoCryptCreateDataKeyError = MongoCryptCreateDataKeyError;
+/**
+ * @public
+ * An error indicating that `ClientEncryption.createEncryptedCollection()` failed to create a collection
+ */
+class MongoCryptCreateEncryptedCollectionError extends MongoCryptError {
+    /**
+     * **Do not use this constructor!**
+     *
+     * Meant for internal use only.
+     *
+     * @remarks
+     * This class is only meant to be constructed within the driver. This constructor is
+     * not subject to semantic versioning compatibility guarantees and may change at any time.
+     *
+     * @public
+     **/
+    constructor(encryptedFields, { cause }) {
+        super(`Unable to create collection: ${cause.message}`, { cause });
+        this.encryptedFields = encryptedFields;
+    }
+    get name() {
+        return 'MongoCryptCreateEncryptedCollectionError';
+    }
+}
+exports.MongoCryptCreateEncryptedCollectionError = MongoCryptCreateEncryptedCollectionError;
+/**
+ * @public
+ * An error indicating that mongodb-client-encryption failed to auto-refresh Azure KMS credentials.
+ */
+class MongoCryptAzureKMSRequestError extends MongoCryptError {
+    /**
+     * **Do not use this constructor!**
+     *
+     * Meant for internal use only.
+     *
+     * @remarks
+     * This class is only meant to be constructed within the driver. This constructor is
+     * not subject to semantic versioning compatibility guarantees and may change at any time.
+     *
+     * @public
+     **/
+    constructor(message, body) {
+        super(message);
+        this.body = body;
+    }
+    get name() {
+        return 'MongoCryptAzureKMSRequestError';
+    }
+}
+exports.MongoCryptAzureKMSRequestError = MongoCryptAzureKMSRequestError;
+/** @public */
+class MongoCryptKMSRequestNetworkTimeoutError extends MongoCryptError {
+    get name() {
+        return 'MongoCryptKMSRequestNetworkTimeoutError';
+    }
+}
+exports.MongoCryptKMSRequestNetworkTimeoutError = MongoCryptKMSRequestNetworkTimeoutError;
 //# sourceMappingURL=errors.js.map
