@@ -1,14 +1,11 @@
-import { MongoDriverError, MongoErrorLabel, MongoNetworkError } from '../error';
-import type { ConnectionPool } from './connection_pool';
+import { type Document } from '../bson';
+import { MongoError } from '../error';
 
 /**
- * An error indicating a connection pool is closed
- * @category Error
+ * @public
+ * An error indicating that something went wrong specifically with MongoDB Client Encryption
  */
-export class PoolClosedError extends MongoDriverError {
-  /** The address of the connection pool */
-  address: string;
-
+export class MongoCryptError extends MongoError {
   /**
    * **Do not use this constructor!**
    *
@@ -20,24 +17,24 @@ export class PoolClosedError extends MongoDriverError {
    *
    * @public
    **/
-  constructor(pool: ConnectionPool) {
-    super('Attempted to check out a connection from closed connection pool');
-    this.address = pool.address;
+  constructor(message: string, options: { cause?: Error } = {}) {
+    super(message, options);
   }
 
-  override get name(): string {
-    return 'MongoPoolClosedError';
+  override get name() {
+    return 'MongoCryptError';
   }
 }
 
-/**
- * An error indicating a connection pool is currently paused
- * @category Error
- */
-export class PoolClearedError extends MongoNetworkError {
-  /** The address of the connection pool */
-  address: string;
+export const defaultErrorWrapper = (error: Error) =>
+  new MongoCryptError(error.message, { cause: error });
 
+/**
+ * @public
+ *
+ * An error indicating an invalid argument was provided to an encryption API.
+ */
+export class MongoCryptInvalidArgumentError extends MongoCryptError {
   /**
    * **Do not use this constructor!**
    *
@@ -49,71 +46,99 @@ export class PoolClearedError extends MongoNetworkError {
    *
    * @public
    **/
-  constructor(pool: ConnectionPool, message?: string) {
-    const errorMessage = message
-      ? message
-      : `Connection pool for ${pool.address} was cleared because another operation failed with: "${pool.serverError?.message}"`;
-    super(errorMessage, pool.serverError ? { cause: pool.serverError } : undefined);
-    this.address = pool.address;
-
-    this.addErrorLabel(MongoErrorLabel.PoolRequestedRetry);
-  }
-
-  override get name(): string {
-    return 'MongoPoolClearedError';
-  }
-}
-
-/**
- * An error indicating that a connection pool has been cleared after the monitor for that server timed out.
- * @category Error
- */
-export class PoolClearedOnNetworkError extends PoolClearedError {
-  /**
-   * **Do not use this constructor!**
-   *
-   * Meant for internal use only.
-   *
-   * @remarks
-   * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatibility guarantees and may change at any time.
-   *
-   * @public
-   **/
-  constructor(pool: ConnectionPool) {
-    super(pool, `Connection to ${pool.address} interrupted due to server monitor timeout`);
-  }
-
-  override get name(): string {
-    return 'PoolClearedOnNetworkError';
-  }
-}
-
-/**
- * An error thrown when a request to check out a connection times out
- * @category Error
- */
-export class WaitQueueTimeoutError extends MongoDriverError {
-  /** The address of the connection pool */
-  address: string;
-
-  /**
-   * **Do not use this constructor!**
-   *
-   * Meant for internal use only.
-   *
-   * @remarks
-   * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatibility guarantees and may change at any time.
-   *
-   * @public
-   **/
-  constructor(message: string, address: string) {
+  constructor(message: string) {
     super(message);
-    this.address = address;
+  }
+
+  override get name() {
+    return 'MongoCryptInvalidArgumentError';
+  }
+}
+/**
+ * @public
+ * An error indicating that `ClientEncryption.createEncryptedCollection()` failed to create data keys
+ */
+export class MongoCryptCreateDataKeyError extends MongoCryptError {
+  encryptedFields: Document;
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(encryptedFields: Document, { cause }: { cause: Error }) {
+    super(`Unable to complete creating data keys: ${cause.message}`, { cause });
+    this.encryptedFields = encryptedFields;
+  }
+
+  override get name() {
+    return 'MongoCryptCreateDataKeyError';
+  }
+}
+
+/**
+ * @public
+ * An error indicating that `ClientEncryption.createEncryptedCollection()` failed to create a collection
+ */
+export class MongoCryptCreateEncryptedCollectionError extends MongoCryptError {
+  encryptedFields: Document;
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(encryptedFields: Document, { cause }: { cause: Error }) {
+    super(`Unable to create collection: ${cause.message}`, { cause });
+    this.encryptedFields = encryptedFields;
+  }
+
+  override get name() {
+    return 'MongoCryptCreateEncryptedCollectionError';
+  }
+}
+
+/**
+ * @public
+ * An error indicating that mongodb-client-encryption failed to auto-refresh Azure KMS credentials.
+ */
+export class MongoCryptAzureKMSRequestError extends MongoCryptError {
+  /** The body of the http response that failed, if present. */
+  body?: Document;
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(message: string, body?: Document) {
+    super(message);
+    this.body = body;
   }
 
   override get name(): string {
-    return 'MongoWaitQueueTimeoutError';
+    return 'MongoCryptAzureKMSRequestError';
+  }
+}
+
+/** @public */
+export class MongoCryptKMSRequestNetworkTimeoutError extends MongoCryptError {
+  override get name(): string {
+    return 'MongoCryptKMSRequestNetworkTimeoutError';
   }
 }
