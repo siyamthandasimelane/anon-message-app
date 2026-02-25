@@ -1,633 +1,264 @@
-import { Admin } from './admin';
-import { OrderedBulkOperation } from './bulk/ordered';
-import { UnorderedBulkOperation } from './bulk/unordered';
-import { ChangeStream } from './change_stream';
-import { Collection } from './collection';
-import { AbstractCursor } from './cursor/abstract_cursor';
-import { AggregationCursor } from './cursor/aggregation_cursor';
-import { FindCursor } from './cursor/find_cursor';
-import { ListCollectionsCursor } from './cursor/list_collections_cursor';
-import { ListIndexesCursor } from './cursor/list_indexes_cursor';
-import type { RunCommandCursor } from './cursor/run_command_cursor';
-import { Db } from './db';
-import { GridFSBucket } from './gridfs';
-import { GridFSBucketReadStream } from './gridfs/download';
-import { GridFSBucketWriteStream } from './gridfs/upload';
-import { MongoClient } from './mongo_client';
-import { CancellationToken } from './mongo_types';
-import { ClientSession } from './sessions';
-
-/** @public */
-export { BSON } from './bson';
-export {
-  Binary,
-  BSONRegExp,
-  BSONSymbol,
-  BSONType,
-  Code,
-  DBRef,
-  Decimal128,
-  Double,
-  Int32,
-  Long,
-  MaxKey,
-  MinKey,
-  ObjectId,
-  Timestamp,
-  UUID
-} from './bson';
-export {
-  type AnyBulkWriteOperation,
-  type BulkWriteOptions,
-  MongoBulkWriteError
-} from './bulk/common';
-export { ClientEncryption } from './client-side-encryption/client_encryption';
-export { ChangeStreamCursor } from './cursor/change_stream_cursor';
-export { ExplainableCursor } from './cursor/explainable_cursor';
-export {
-  MongoAPIError,
-  MongoAWSError,
-  MongoAzureError,
-  MongoBatchReExecutionError,
-  MongoChangeStreamError,
-  MongoClientBulkWriteCursorError,
-  MongoClientBulkWriteError,
-  MongoClientBulkWriteExecutionError,
-  MongoClientClosedError,
-  MongoCompatibilityError,
-  MongoCursorExhaustedError,
-  MongoCursorInUseError,
-  MongoDecompressionError,
-  MongoDriverError,
-  MongoError,
-  MongoExpiredSessionError,
-  MongoGCPError,
-  MongoGridFSChunkError,
-  MongoGridFSStreamError,
-  MongoInvalidArgumentError,
-  MongoKerberosError,
-  MongoMissingCredentialsError,
-  MongoMissingDependencyError,
-  MongoNetworkError,
-  MongoNetworkTimeoutError,
-  MongoNotConnectedError,
-  MongoOIDCError,
-  MongoOperationTimeoutError,
-  MongoParseError,
-  MongoRuntimeError,
-  MongoServerClosedError,
-  MongoServerError,
-  MongoServerSelectionError,
-  MongoStalePrimaryError,
-  MongoSystemError,
-  MongoTailableCursorError,
-  MongoTopologyClosedError,
-  MongoTransactionError,
-  MongoUnexpectedServerResponseError,
-  MongoWriteConcernError,
-  WriteConcernErrorResult
-} from './error';
-export {
-  AbstractCursor,
-  // Actual driver classes exported
-  Admin,
-  AggregationCursor,
-  CancellationToken,
-  ChangeStream,
-  ClientSession,
-  Collection,
-  Db,
-  FindCursor,
-  GridFSBucket,
+import type { ObjectId } from '../bson';
+import type { Collection } from '../collection';
+import type { FindCursor } from '../cursor/find_cursor';
+import type { Db } from '../db';
+import { MongoOperationTimeoutError, MongoRuntimeError } from '../error';
+import { type Filter, TypedEventEmitter } from '../mongo_types';
+import type { ReadPreference } from '../read_preference';
+import type { Sort } from '../sort';
+import { CSOTTimeoutContext } from '../timeout';
+import { noop, resolveOptions } from '../utils';
+import { WriteConcern, type WriteConcernOptions } from '../write_concern';
+import type { FindOptions } from './../operations/find';
+import {
   GridFSBucketReadStream,
+  type GridFSBucketReadStreamOptions,
+  type GridFSBucketReadStreamOptionsWithRevision,
+  type GridFSFile
+} from './download';
+import {
   GridFSBucketWriteStream,
-  ListCollectionsCursor,
-  ListIndexesCursor,
-  MongoClient,
-  OrderedBulkOperation,
-  RunCommandCursor,
-  UnorderedBulkOperation
+  type GridFSBucketWriteStreamOptions,
+  type GridFSChunk
+} from './upload';
+
+const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
+  bucketName: string;
+  chunkSizeBytes: number;
+} = {
+  bucketName: 'fs',
+  chunkSizeBytes: 255 * 1024
 };
 
-// enums
-export { BatchType } from './bulk/common';
-export { AutoEncryptionLoggerLevel } from './client-side-encryption/auto_encrypter';
-export { GSSAPICanonicalizationValue } from './cmap/auth/gssapi';
-export { AuthMechanism } from './cmap/auth/providers';
-export { Compressor } from './cmap/wire_protocol/compression';
-export { CURSOR_FLAGS, CursorTimeoutMode } from './cursor/abstract_cursor';
-export { MongoErrorLabel } from './error';
-export { ExplainVerbosity } from './explain';
-export { ServerApiVersion } from './mongo_client';
-export { MongoLoggableComponent, SeverityLevel } from './mongo_logger';
-export { ReturnDocument } from './operations/find_and_modify';
-export { ProfilingLevel } from './operations/set_profiling_level';
-export { ReadConcernLevel } from './read_concern';
-export { ReadPreferenceMode } from './read_preference';
-export { ServerType, TopologyType } from './sdam/common';
+/** @public */
+export interface GridFSBucketOptions extends WriteConcernOptions {
+  /** The 'files' and 'chunks' collections will be prefixed with the bucket name followed by a dot. */
+  bucketName?: string;
+  /** Number of bytes stored in each chunk. Defaults to 255KB */
+  chunkSizeBytes?: number;
+  /** Read preference to be passed to read operations */
+  readPreference?: ReadPreference;
+  /**
+   * @experimental
+   * Specifies the lifetime duration of a gridFS stream. If any async operations are in progress
+   * when this timeout expires, the stream will throw a timeout error.
+   */
+  timeoutMS?: number;
+}
 
-// Helper classes
-export type { AWSCredentialProvider } from './cmap/auth/aws_temporary_credentials';
-export type { AWSCredentials } from './deps';
-export { ReadConcern } from './read_concern';
-export { ReadPreference } from './read_preference';
-export { WriteConcern } from './write_concern';
-// events
-export {
-  CommandFailedEvent,
-  CommandStartedEvent,
-  CommandSucceededEvent
-} from './cmap/command_monitoring_events';
-export {
-  ConnectionCheckedInEvent,
-  ConnectionCheckedOutEvent,
-  ConnectionCheckOutFailedEvent,
-  ConnectionCheckOutStartedEvent,
-  ConnectionClosedEvent,
-  ConnectionCreatedEvent,
-  ConnectionPoolClearedEvent,
-  ConnectionPoolClosedEvent,
-  ConnectionPoolCreatedEvent,
-  ConnectionPoolMonitoringEvent,
-  ConnectionPoolReadyEvent,
-  ConnectionReadyEvent
-} from './cmap/connection_pool_events';
-export {
-  ServerClosedEvent,
-  ServerDescriptionChangedEvent,
-  ServerHeartbeatFailedEvent,
-  ServerHeartbeatStartedEvent,
-  ServerHeartbeatSucceededEvent,
-  ServerOpeningEvent,
-  TopologyClosedEvent,
-  TopologyDescriptionChangedEvent,
-  TopologyOpeningEvent
-} from './sdam/events';
-export {
-  ServerSelectionEvent,
-  ServerSelectionFailedEvent,
-  ServerSelectionStartedEvent,
-  ServerSelectionSucceededEvent,
-  WaitingForSuitableServerEvent
-} from './sdam/server_selection_events';
-export { SrvPollingEvent } from './sdam/srv_polling';
+/** @internal */
+export interface GridFSBucketPrivate {
+  db: Db;
+  options: {
+    bucketName: string;
+    chunkSizeBytes: number;
+    readPreference?: ReadPreference;
+    writeConcern: WriteConcern | undefined;
+    timeoutMS?: number;
+  };
+  _chunksCollection: Collection<GridFSChunk>;
+  _filesCollection: Collection<GridFSFile>;
+  checkedIndexes: boolean;
+  calledOpenUploadStream: boolean;
+}
 
-// type only exports below, these are removed from emitted JS
-export type { AdminPrivate } from './admin';
-export type { BSONElement, BSONSerializeOptions, Document } from './bson';
-export type { deserialize, serialize } from './bson';
-export type {
-  BulkResult,
-  BulkWriteOperationError,
-  BulkWriteResult,
-  DeleteManyModel,
-  DeleteOneModel,
-  InsertOneModel,
-  ReplaceOneModel,
-  UpdateManyModel,
-  UpdateOneModel,
-  WriteConcernError,
-  WriteError
-} from './bulk/common';
-export type {
-  Batch,
-  BulkOperationBase,
-  BulkOperationPrivate,
-  FindOperators,
-  WriteConcernErrorData
-} from './bulk/common';
-export type {
-  ChangeStreamCollModDocument,
-  ChangeStreamCreateDocument,
-  ChangeStreamCreateIndexDocument,
-  ChangeStreamDeleteDocument,
-  ChangeStreamDocument,
-  ChangeStreamDocumentCollectionUUID,
-  ChangeStreamDocumentCommon,
-  ChangeStreamDocumentKey,
-  ChangeStreamDocumentOperationDescription,
-  ChangeStreamDocumentWallTime,
-  ChangeStreamDropDatabaseDocument,
-  ChangeStreamDropDocument,
-  ChangeStreamDropIndexDocument,
-  ChangeStreamEvents,
-  ChangeStreamInsertDocument,
-  ChangeStreamInvalidateDocument,
-  ChangeStreamNameSpace,
-  ChangeStreamOptions,
-  ChangeStreamRefineCollectionShardKeyDocument,
-  ChangeStreamRenameDocument,
-  ChangeStreamReplaceDocument,
-  ChangeStreamReshardCollectionDocument,
-  ChangeStreamShardCollectionDocument,
-  ChangeStreamSplitEvent,
-  ChangeStreamUpdateDocument,
-  OperationTime,
-  ResumeToken,
-  UpdateDescription
-} from './change_stream';
-export type { AutoEncrypter } from './client-side-encryption/auto_encrypter';
-export type { AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
-export type { AutoEncryptionExtraOptions } from './client-side-encryption/auto_encrypter';
-export type {
-  AWSEncryptionKeyOptions,
-  AzureEncryptionKeyOptions,
-  ClientEncryptionCreateDataKeyProviderOptions,
-  ClientEncryptionEncryptOptions,
-  ClientEncryptionOptions,
-  ClientEncryptionRewrapManyDataKeyProviderOptions,
-  ClientEncryptionRewrapManyDataKeyResult,
-  DataKey,
-  GCPEncryptionKeyOptions,
-  KMIPEncryptionKeyOptions,
-  RangeOptions,
-  TextQueryOptions
-} from './client-side-encryption/client_encryption';
-export {
-  MongoCryptAzureKMSRequestError,
-  MongoCryptCreateDataKeyError,
-  MongoCryptCreateEncryptedCollectionError,
-  MongoCryptError,
-  MongoCryptInvalidArgumentError,
-  MongoCryptKMSRequestNetworkTimeoutError
-} from './client-side-encryption/errors';
-export type { MongocryptdManager } from './client-side-encryption/mongocryptd_manager';
-export type {
-  AWSKMSProviderConfiguration,
-  AzureKMSProviderConfiguration,
-  ClientEncryptionDataKeyProvider,
-  CredentialProviders,
-  GCPKMSProviderConfiguration,
-  KMIPKMSProviderConfiguration,
-  KMSProviders,
-  LocalKMSProviderConfiguration
-} from './client-side-encryption/providers/index';
-export type {
-  ClientEncryptionSocketOptions,
-  ClientEncryptionTlsOptions,
-  CSFLEKMSTlsOptions,
-  StateMachineExecutable
-} from './client-side-encryption/state_machine';
-export type { AuthContext, AuthProvider } from './cmap/auth/auth_provider';
-export type {
-  AuthMechanismProperties,
-  MongoCredentials,
-  MongoCredentialsOptions
-} from './cmap/auth/mongo_credentials';
-export type {
-  IdPInfo,
-  IdPServerResponse,
-  OIDCCallbackFunction,
-  OIDCCallbackParams,
-  OIDCResponse
-} from './cmap/auth/mongodb_oidc';
-export type { Workflow } from './cmap/auth/mongodb_oidc';
-export type { TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
-export type {
-  MessageHeader,
-  OpCompressedRequest,
-  OpCompressesRequestOptions,
-  OpMsgOptions,
-  OpMsgRequest,
-  OpMsgResponse,
-  OpQueryOptions,
-  OpQueryRequest,
-  OpReply,
-  WriteProtocolMessageType
-} from './cmap/commands';
-export type { HandshakeDocument } from './cmap/connect';
-export type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS, Stream } from './cmap/connect';
-export type {
-  CommandOptions,
-  Connection,
-  ConnectionEvents,
-  ConnectionOptions,
-  ProxyOptions
-} from './cmap/connection';
-export type {
-  ConnectionPool,
-  ConnectionPoolEvents,
-  ConnectionPoolOptions,
-  PoolState,
-  WaitQueueMember,
-  WithConnectionCallback
-} from './cmap/connection_pool';
-export type { ClientMetadata } from './cmap/handshake/client_metadata';
-export type { ConnectionPoolMetrics } from './cmap/metrics';
-export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
-export type { CompressorName } from './cmap/wire_protocol/compression';
-export type {
-  JSTypeOf,
-  OnDemandDocument,
-  OnDemandDocumentDeserializeOptions
-} from './cmap/wire_protocol/on_demand/document';
-export type {
-  CursorResponse,
-  MongoDBResponse,
-  MongoDBResponseConstructor
-} from './cmap/wire_protocol/responses';
-export type {
-  CollectionOptions,
-  CollectionPrivate,
-  CountDocumentsOptions,
-  ModifyResult
-} from './collection';
-export type {
-  COMMAND_FAILED,
-  COMMAND_STARTED,
-  COMMAND_SUCCEEDED,
-  CONNECTION_CHECK_OUT_FAILED,
-  CONNECTION_CHECK_OUT_STARTED,
-  CONNECTION_CHECKED_IN,
-  CONNECTION_CHECKED_OUT,
-  CONNECTION_CLOSED,
-  CONNECTION_CREATED,
-  CONNECTION_POOL_CLEARED,
-  CONNECTION_POOL_CLOSED,
-  CONNECTION_POOL_CREATED,
-  CONNECTION_POOL_READY,
-  CONNECTION_READY,
-  MONGO_CLIENT_EVENTS,
-  SERVER_CLOSED,
-  SERVER_DESCRIPTION_CHANGED,
-  SERVER_HEARTBEAT_FAILED,
-  SERVER_HEARTBEAT_STARTED,
-  SERVER_HEARTBEAT_SUCCEEDED,
-  SERVER_OPENING,
-  SERVER_SELECTION_FAILED,
-  SERVER_SELECTION_STARTED,
-  SERVER_SELECTION_SUCCEEDED,
-  TOPOLOGY_CLOSED,
-  TOPOLOGY_DESCRIPTION_CHANGED,
-  TOPOLOGY_OPENING,
-  WAITING_FOR_SUITABLE_SERVER
-} from './constants';
-export type {
-  AbstractCursorEvents,
-  AbstractCursorOptions,
-  CursorFlag
-} from './cursor/abstract_cursor';
-export type {
-  CursorTimeoutContext,
-  InitialCursorResponse,
-  InternalAbstractCursorOptions
-} from './cursor/abstract_cursor';
-export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
-export type { ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
-export type {
-  ListSearchIndexesCursor,
-  ListSearchIndexesOptions
-} from './cursor/list_search_indexes_cursor';
-export type { RunCursorCommandOptions } from './cursor/run_command_cursor';
-export type { DbOptions, DbPrivate } from './db';
-export type { Encrypter, EncrypterOptions } from './encrypter';
-export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
-export type {
-  Explain,
-  ExplainCommandOptions,
-  ExplainOptions,
-  ExplainVerbosityLike
-} from './explain';
-export type {
-  GridFSBucketReadStreamOptions,
-  GridFSBucketReadStreamOptionsWithRevision,
-  GridFSBucketReadStreamPrivate,
-  GridFSFile
-} from './gridfs/download';
-export type { GridFSBucketEvents, GridFSBucketOptions, GridFSBucketPrivate } from './gridfs/index';
-export type { GridFSBucketWriteStreamOptions, GridFSChunk } from './gridfs/upload';
-export type {
-  Auth,
-  DriverInfo,
-  MongoClientEvents,
-  MongoClientOptions,
-  MongoClientPrivate,
-  MongoOptions,
-  PkFactory,
-  ServerApi,
-  SupportedNodeConnectionOptions,
-  SupportedSocketOptions,
-  SupportedTLSConnectionOptions,
-  SupportedTLSSocketOptions,
-  WithSessionCallback
-} from './mongo_client';
-export { MongoClientAuthProviders } from './mongo_client_auth_providers';
-export type {
-  Log,
-  LogComponentSeveritiesClientOptions,
-  LogConvertible,
-  Loggable,
-  LoggableCommandFailedEvent,
-  LoggableCommandSucceededEvent,
-  LoggableEvent,
-  LoggableServerHeartbeatFailedEvent,
-  LoggableServerHeartbeatStartedEvent,
-  LoggableServerHeartbeatSucceededEvent,
-  MongoDBLogWritable,
-  MongoLogger,
-  MongoLoggerEnvOptions,
-  MongoLoggerMongoClientOptions,
-  MongoLoggerOptions
-} from './mongo_logger';
-export type {
-  Abortable,
-  CommonEvents,
-  EventsDescription,
-  GenericListener,
-  TypedEventEmitter
-} from './mongo_types';
-export type {
-  AcceptedFields,
-  AddToSetOperators,
-  AlternativeType,
-  ArrayElement,
-  ArrayOperator,
-  BitwiseFilter,
-  BSONTypeAlias,
-  Condition,
-  EnhancedOmit,
-  Filter,
-  FilterOperations,
-  FilterOperators,
-  Flatten,
-  InferIdType,
-  IntegerType,
-  IsAny,
-  Join,
-  KeysOfAType,
-  KeysOfOtherType,
-  MatchKeysAndValues,
-  NestedPaths,
-  NestedPathsOfType,
-  NonObjectIdLikeDocument,
-  NotAcceptedFields,
-  NumericType,
-  OneOrMore,
-  OnlyFieldsOfType,
-  OptionalId,
-  OptionalUnlessRequiredId,
-  PropertyType,
-  PullAllOperator,
-  PullOperator,
-  PushOperator,
-  RegExpOrString,
-  RootFilterOperators,
-  SchemaMember,
-  SetFields,
-  StrictFilter,
-  StrictMatchKeysAndValues,
-  StrictUpdateFilter,
-  UpdateFilter,
-  WithId,
-  WithoutId
-} from './mongo_types';
-export type {
-  AggregateOperation,
-  AggregateOptions,
-  DB_AGGREGATE_COLLECTION
-} from './operations/aggregate';
-export type {
-  AnyClientBulkWriteModel,
-  ClientBulkWriteError,
-  ClientBulkWriteModel,
-  ClientBulkWriteOptions,
-  ClientBulkWriteResult,
-  ClientDeleteManyModel,
-  ClientDeleteOneModel,
-  ClientDeleteResult,
-  ClientInsertOneModel,
-  ClientInsertOneResult,
-  ClientReplaceOneModel,
-  ClientUpdateManyModel,
-  ClientUpdateOneModel,
-  ClientUpdateResult,
-  ClientWriteModel
-} from './operations/client_bulk_write/common';
-export type {
-  CollationOptions,
-  CommandOperation,
-  CommandOperationOptions,
-  OperationParent
-} from './operations/command';
-export type { CountOptions } from './operations/count';
-export type {
-  ClusteredCollectionOptions,
-  CreateCollectionOptions,
-  TimeSeriesCollectionOptions
-} from './operations/create_collection';
-export type { DeleteOptions, DeleteResult, DeleteStatement } from './operations/delete';
-export type { DistinctOptions } from './operations/distinct';
-export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';
-export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
-export type { FindOneOptions, FindOptions } from './operations/find';
-export type {
-  FindOneAndDeleteOptions,
-  FindOneAndReplaceOptions,
-  FindOneAndUpdateOptions
-} from './operations/find_and_modify';
-export type { IndexInformationOptions } from './operations/indexes';
-export type {
-  CreateIndexesOptions,
-  DropIndexesOptions,
-  IndexDescription,
-  IndexDescriptionCompact,
-  IndexDescriptionInfo,
-  IndexDirection,
-  IndexSpecification,
-  ListIndexesOptions
-} from './operations/indexes';
-export type { InsertManyResult, InsertOneOptions, InsertOneResult } from './operations/insert';
-export type { CollectionInfo, ListCollectionsOptions } from './operations/list_collections';
-export type { ListDatabasesOptions, ListDatabasesResult } from './operations/list_databases';
-export type { AbstractOperation, Hint, OperationOptions } from './operations/operation';
-export type { ProfilingLevelOptions } from './operations/profiling_level';
-export type { RemoveUserOptions } from './operations/remove_user';
-export type { RenameOptions } from './operations/rename';
-export type { RunCommandOptions } from './operations/run_command';
-export type { SearchIndexDescription } from './operations/search_indexes/create';
-export type { SetProfilingLevelOptions } from './operations/set_profiling_level';
-export type { DbStatsOptions } from './operations/stats';
-export type {
-  ReplaceOptions,
-  UpdateOptions,
-  UpdateResult,
-  UpdateStatement
-} from './operations/update';
-export type { ValidateCollectionOptions } from './operations/validate_collection';
-export type { ReadConcernLike } from './read_concern';
-export type {
-  HedgeOptions,
-  ReadPreferenceFromOptions,
-  ReadPreferenceLike,
-  ReadPreferenceLikeOptions,
-  ReadPreferenceOptions
-} from './read_preference';
-export type { ClusterTime } from './sdam/common';
-export type {
-  Monitor,
-  MonitorEvents,
-  MonitorInterval,
-  MonitorIntervalOptions,
-  MonitorOptions,
-  MonitorPrivate,
-  RTTPinger,
-  RTTPingerOptions,
-  RTTSampler,
-  ServerMonitoringMode
-} from './sdam/monitor';
-export type {
-  Server,
-  ServerCommandOptions,
-  ServerEvents,
-  ServerOptions,
-  ServerPrivate
-} from './sdam/server';
-export type {
-  ServerDescription,
-  ServerDescriptionOptions,
-  TagSet,
-  TopologyVersion
-} from './sdam/server_description';
-export type { DeprioritizedServers, ServerSelector } from './sdam/server_selection';
-export type { SrvPoller, SrvPollerEvents, SrvPollerOptions } from './sdam/srv_polling';
-export type {
-  ConnectOptions,
-  SelectServerOptions,
-  ServerSelectionCallback,
-  ServerSelectionRequest,
-  Topology,
-  TopologyEvents,
-  TopologyOptions,
-  TopologyPrivate
-} from './sdam/topology';
-export type { TopologyDescription, TopologyDescriptionOptions } from './sdam/topology_description';
-export type {
-  ClientSessionEvents,
-  ClientSessionOptions,
-  EndSessionOptions,
-  ServerSession,
-  ServerSessionId,
-  ServerSessionPool,
-  WithTransactionCallback
-} from './sessions';
-export type { Sort, SortDirection, SortDirectionForCmd, SortForCmd } from './sort';
-export type {
-  CSOTTimeoutContext,
-  CSOTTimeoutContextOptions,
-  LegacyTimeoutContext,
-  LegacyTimeoutContextOptions,
-  Timeout,
-  TimeoutContext,
-  TimeoutContextOptions
-} from './timeout';
-export type { Transaction, TransactionOptions, TxnState } from './transactions';
-export type {
-  BufferPool,
-  Callback,
-  EventEmitterWithState,
-  HostAddress,
-  List,
-  MongoDBCollectionNamespace,
-  MongoDBNamespace
-} from './utils';
-export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
+/** @public */
+export type GridFSBucketEvents = {
+  index(): void;
+};
+
+/**
+ * Constructor for a streaming GridFS interface
+ * @public
+ */
+export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
+  /** @internal */
+  s: GridFSBucketPrivate;
+
+  /**
+   * When the first call to openUploadStream is made, the upload stream will
+   * check to see if it needs to create the proper indexes on the chunks and
+   * files collections. This event is fired either when 1) it determines that
+   * no index creation is necessary, 2) when it successfully creates the
+   * necessary indexes.
+   * @event
+   */
+  static readonly INDEX = 'index' as const;
+
+  constructor(db: Db, options?: GridFSBucketOptions) {
+    super();
+    this.on('error', noop);
+    this.setMaxListeners(0);
+    const privateOptions = resolveOptions(db, {
+      ...DEFAULT_GRIDFS_BUCKET_OPTIONS,
+      ...options,
+      writeConcern: WriteConcern.fromOptions(options)
+    });
+    this.s = {
+      db,
+      options: privateOptions,
+      _chunksCollection: db.collection<GridFSChunk>(privateOptions.bucketName + '.chunks'),
+      _filesCollection: db.collection<GridFSFile>(privateOptions.bucketName + '.files'),
+      checkedIndexes: false,
+      calledOpenUploadStream: false
+    };
+  }
+
+  /**
+   * Returns a writable stream (GridFSBucketWriteStream) for writing
+   * buffers to GridFS. The stream's 'id' property contains the resulting
+   * file's id.
+   *
+   * @param filename - The value of the 'filename' key in the files doc
+   * @param options - Optional settings.
+   */
+
+  openUploadStream(
+    filename: string,
+    options?: GridFSBucketWriteStreamOptions
+  ): GridFSBucketWriteStream {
+    return new GridFSBucketWriteStream(this, filename, {
+      timeoutMS: this.s.options.timeoutMS,
+      ...options
+    });
+  }
+
+  /**
+   * Returns a writable stream (GridFSBucketWriteStream) for writing
+   * buffers to GridFS for a custom file id. The stream's 'id' property contains the resulting
+   * file's id.
+   */
+  openUploadStreamWithId(
+    id: ObjectId,
+    filename: string,
+    options?: GridFSBucketWriteStreamOptions
+  ): GridFSBucketWriteStream {
+    return new GridFSBucketWriteStream(this, filename, {
+      timeoutMS: this.s.options.timeoutMS,
+      ...options,
+      id
+    });
+  }
+
+  /** Returns a readable stream (GridFSBucketReadStream) for streaming file data from GridFS. */
+  openDownloadStream(
+    id: ObjectId,
+    options?: GridFSBucketReadStreamOptions
+  ): GridFSBucketReadStream {
+    return new GridFSBucketReadStream(
+      this.s._chunksCollection,
+      this.s._filesCollection,
+      this.s.options.readPreference,
+      { _id: id },
+      { timeoutMS: this.s.options.timeoutMS, ...options }
+    );
+  }
+
+  /**
+   * Deletes a file with the given id
+   *
+   * @param id - The id of the file doc
+   */
+  async delete(id: ObjectId, options?: { timeoutMS: number }): Promise<void> {
+    const { timeoutMS } = resolveOptions(this.s.db, options);
+    let timeoutContext: CSOTTimeoutContext | undefined = undefined;
+
+    if (timeoutMS) {
+      timeoutContext = new CSOTTimeoutContext({
+        timeoutMS,
+        serverSelectionTimeoutMS: this.s.db.client.s.options.serverSelectionTimeoutMS
+      });
+    }
+
+    const { deletedCount } = await this.s._filesCollection.deleteOne(
+      { _id: id },
+      { timeoutMS: timeoutContext?.remainingTimeMS }
+    );
+
+    const remainingTimeMS = timeoutContext?.remainingTimeMS;
+    if (remainingTimeMS != null && remainingTimeMS <= 0)
+      throw new MongoOperationTimeoutError(`Timed out after ${timeoutMS}ms`);
+    // Delete orphaned chunks before returning FileNotFound
+    await this.s._chunksCollection.deleteMany({ files_id: id }, { timeoutMS: remainingTimeMS });
+
+    if (deletedCount === 0) {
+      // TODO(NODE-3483): Replace with more appropriate error
+      // Consider creating new error MongoGridFSFileNotFoundError
+      throw new MongoRuntimeError(`File not found for id ${id}`);
+    }
+  }
+
+  /** Convenience wrapper around find on the files collection */
+  find(filter: Filter<GridFSFile> = {}, options: FindOptions = {}): FindCursor<GridFSFile> {
+    return this.s._filesCollection.find(filter, options);
+  }
+
+  /**
+   * Returns a readable stream (GridFSBucketReadStream) for streaming the
+   * file with the given name from GridFS. If there are multiple files with
+   * the same name, this will stream the most recent file with the given name
+   * (as determined by the `uploadDate` field). You can set the `revision`
+   * option to change this behavior.
+   */
+  openDownloadStreamByName(
+    filename: string,
+    options?: GridFSBucketReadStreamOptionsWithRevision
+  ): GridFSBucketReadStream {
+    let sort: Sort = { uploadDate: -1 };
+    let skip = undefined;
+    if (options && options.revision != null) {
+      if (options.revision >= 0) {
+        sort = { uploadDate: 1 };
+        skip = options.revision;
+      } else {
+        skip = -options.revision - 1;
+      }
+    }
+    return new GridFSBucketReadStream(
+      this.s._chunksCollection,
+      this.s._filesCollection,
+      this.s.options.readPreference,
+      { filename },
+      { timeoutMS: this.s.options.timeoutMS, ...options, sort, skip }
+    );
+  }
+
+  /**
+   * Renames the file with the given _id to the given string
+   *
+   * @param id - the id of the file to rename
+   * @param filename - new name for the file
+   */
+  async rename(id: ObjectId, filename: string, options?: { timeoutMS: number }): Promise<void> {
+    const filter = { _id: id };
+    const update = { $set: { filename } };
+    const { matchedCount } = await this.s._filesCollection.updateOne(filter, update, options);
+    if (matchedCount === 0) {
+      throw new MongoRuntimeError(`File with id ${id} not found`);
+    }
+  }
+
+  /** Removes this bucket's files collection, followed by its chunks collection. */
+  async drop(options?: { timeoutMS: number }): Promise<void> {
+    const { timeoutMS } = resolveOptions(this.s.db, options);
+    let timeoutContext: CSOTTimeoutContext | undefined = undefined;
+
+    if (timeoutMS) {
+      timeoutContext = new CSOTTimeoutContext({
+        timeoutMS,
+        serverSelectionTimeoutMS: this.s.db.client.s.options.serverSelectionTimeoutMS
+      });
+    }
+
+    if (timeoutContext) {
+      await this.s._filesCollection.drop({ timeoutMS: timeoutContext.remainingTimeMS });
+      const remainingTimeMS = timeoutContext.getRemainingTimeMSOrThrow(
+        `Timed out after ${timeoutMS}ms`
+      );
+      await this.s._chunksCollection.drop({ timeoutMS: remainingTimeMS });
+    } else {
+      await this.s._filesCollection.drop();
+      await this.s._chunksCollection.drop();
+    }
+  }
+}
